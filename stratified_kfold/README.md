@@ -1,10 +1,17 @@
-## 매우 작은 bounding box 제거
+## basic 데이터셋
+
+- `basic`: 신규범 캠퍼님 코드 기반 kfold split 데이터셋([링크](https://stages.ai/competitions/178/discussion/talk/post/1203))
+- `basic_v2`: 남혜린 조교님 코드 기반 kfold split 데이터셋([링크](https://stages.ai/competitions/178/discussion/talk/post/1205))
+
+</br>
+
+## Tiny bounding box 제거 데이터셋
 
 <img width="248" alt="bbox_ratio" src="https://user-images.githubusercontent.com/63924704/159717730-7682c1ea-07ed-404b-bff7-19c1ca5009b4.png">
 
-- under_01: bbox_ratio < 0.1 제거
-- under_03: bbox_ratio < 0.3 제거
-- under_05: bbox_ratio < 0.5 제거
+- `under_01`: bbox_ratio < 0.1 제거
+- `under_03`: bbox_ratio < 0.3 제거
+- `under_05`: bbox_ratio < 0.5 제거
 
 ## 제거되는 객체 수
 
