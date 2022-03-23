@@ -58,7 +58,7 @@ def main(args):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument('--path', '-p', type=str, default='./stratified_kfold')
+    parser.add_argument('--path', '-p', type=str, default='./')
     parser.add_argument('--n_split', '-n', type=int, default=5)
     arg = parser.parse_args()
     main(arg)
