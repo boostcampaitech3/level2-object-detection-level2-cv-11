@@ -1,5 +1,6 @@
 ## 매우 작은 bounding box 제거
 
+<img width="248" alt="bbox_ratio" src="https://user-images.githubusercontent.com/63924704/159717730-7682c1ea-07ed-404b-bff7-19c1ca5009b4.png">
 
 - under_01: bbox_ratio < 0.1 제거
 - under_03: bbox_ratio < 0.3 제거
