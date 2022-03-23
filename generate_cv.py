@@ -4,9 +4,11 @@ import numpy as np
 import pandas as pd
 import argparse
 from tqdm import tqdm
-
 from iterstrat.ml_stratifiers import MultilabelStratifiedKFold
 
+'''
+https://stages.ai/competitions/178/discussion/talk/post/1203
+'''
 
 data_path = '/opt/ml/detection/dataset'
 annotations_path = os.path.join(data_path, 'train.json')
