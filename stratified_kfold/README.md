@@ -2,6 +2,8 @@
 
 - `basic`: 신규범 캠퍼님 코드 기반 kfold split 데이터셋([링크](https://stages.ai/competitions/178/discussion/talk/post/1203))
 - `basic_v2`: 남혜린 조교님 코드 기반 kfold split 데이터셋([링크](https://stages.ai/competitions/178/discussion/talk/post/1205))
+  - `basic_v2/cv_train_1.json`, `basic_v2/cv_val_1.json` 을 베이스 데이터셋으로 선정하여 학습 진행
+
 
 </br>
 
