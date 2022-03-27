@@ -37,7 +37,11 @@ python pkl_inference.py --pkl output.pickle --csv submission.csv
 ### Resume 
 학습을 이어가고 싶을 때 
 ```
-load_from = None #'/opt/ml/detection/baseline/mmdetection/work_dirs/htc_train/epoch_1.pth'
-resume_from = None # '/opt/ml/detection/baseline/mmdetection/work_dirs/htc_train/epoch_1.pth'
+load_from = '/opt/ml/detection/baseline/mmdetection/work_dirs/htc_train/epoch_1.pth' # Default=None
+resume_from = '/opt/ml/detection/baseline/mmdetection/work_dirs/htc_train/epoch_1.pth' # Default=None
 ```
 그 전까지 저장했던 epoch.pth파일을 default_runtime.py에서 `load_from`, `resume_from` 인자를 수정해서 weight를 받아와 학습을 이어나갈 수 있다. 
+
+### TIP
+`work_dirs/htc_train/~.log` 를 보면 가장 윗부분에 `model`, `data`, `optimizer` 등 모델이 실제로 사용한 파라미터를 확인할 수 있다. \
+코드 자주 고치다보면 예전 파라미터가 궁금해질 때가 있는데 이부분을 참고하면 좋다. 
