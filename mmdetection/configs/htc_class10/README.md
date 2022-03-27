@@ -32,3 +32,12 @@ python pkl_inference.py --pkl output.pickle --csv submission.csv
 ```
 
 베이스코드 inference.ipynb를 참고해 원하는 출력방식에 맞게 submission file를 만든다. 
+
+
+### Resume 
+학습을 이어가고 싶을 때 
+```
+load_from = None #'/opt/ml/detection/baseline/mmdetection/work_dirs/htc_train/epoch_1.pth'
+resume_from = None # '/opt/ml/detection/baseline/mmdetection/work_dirs/htc_train/epoch_1.pth'
+```
+그 전까지 저장했던 epoch.pth파일을 default_runtime.py에서 `load_from`, `resume_from` 인자를 수정해서 weight를 받아와 학습을 이어나갈 수 있다. 
