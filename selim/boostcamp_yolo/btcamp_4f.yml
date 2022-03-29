@@ -1,0 +1,9 @@
+path: ../dataset/yolo/4fold  # dataset root dir
+train: train/images  # train images (relative to 'path')
+val: valid/images  # val images (relative to 'path')
+test:  # test images (optional)
+
+# Classes
+nc: 10  # number of classes
+# names: ['01_ulcer', '02_mass', '04_lymph', '05_bleeding']  # class names
+names: ['General trash', 'Paper', 'Paper pack', 'Metal', 'Glass', 'Plastic', 'Styrofoam', 'Plastic bag', 'Battery', 'Clothing']
