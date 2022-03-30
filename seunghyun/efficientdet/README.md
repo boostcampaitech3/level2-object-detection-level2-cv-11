@@ -5,7 +5,9 @@
 pip install effdet
 ```
 
-2. 학습 코드 실행
+2. `main.py`에서 wandb name 변경
+
+3. 학습 코드 실행
 ```
 python main.py
 ```
