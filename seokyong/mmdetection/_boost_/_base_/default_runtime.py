@@ -8,7 +8,7 @@ log_config = dict(
             init_kwargs=dict(
                 project='two-stage-model',
                 entity = 'canvas11',
-                name = 'HEO-htc-swins-fp16-1024-aug_lee'
+                name = 'HEO-htc-swins-focal-softnms-aug_lee'
             ),
         )
         # dict(type='TensorboardLoggerHook')
@@ -23,7 +23,7 @@ resume_from = None
 workflow = [('train', 1)]
 seed = 2022
 gpu_ids = [0]
-work_dir = './work_dirs/htc_swins_fp16_1024_aug_fpn_trash'
+work_dir = './work_dirs/htc_swins_aug_focal_softnms_fpn_trash'
 
 # disable opencv multithreading to avoid system being overloaded
 opencv_num_threads = 0
