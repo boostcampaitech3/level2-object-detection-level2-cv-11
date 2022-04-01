@@ -1,18 +1,30 @@
+import os
 import torch
 from util import Averager, get_submission
 from tqdm import tqdm
+from torch.optim.lr_scheduler import ReduceLROnPlateau
 from map_boxes import mean_average_precision_for_boxes
+
 categories = ["General trash", "Paper", "Paper pack", "Metal", 
               "Glass", "Plastic", "Styrofoam", "Plastic bag", "Battery", "Clothing"]
 
 
 def train(args, model, optimizer, train_data_loader, valid_data_loader, gt, wandb):
     scaler = torch.cuda.amp.GradScaler()
-    # scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=6, eta_min=0, verbose=False)
+    scheduler = ReduceLROnPlateau(optimizer, mode='max', factor=0.1, patience=5, verbose=True)
     device = 'cuda'
     loss_hist = Averager()
-    model.cuda();
+    model.cuda()
+    best_mAP = 0.
+    earlystopping_counter = 0
+    earlystopping_patience = 8
+    
+    if not os.path.exists('./pretrained'):
+        os.makedirs('./pretrained')  
 
+    if not os.path.exists(args['SAVE_DIR']):
+        os.makedirs(args['SAVE_DIR'])
+    
     for epoch in range(args['NUM_EPOCHS']):
         model.train()
         loss_hist.reset()
@@ -87,4 +99,20 @@ def train(args, model, optimizer, train_data_loader, valid_data_loader, gt, wand
         for _class_num in average_precisions:
             print(f'{categories[int(_class_num)]:15s}| {average_precisions[_class_num][0]:0.3f} | {average_precisions[_class_num][1]}')
 
-        torch.save(model.state_dict(), f'pretrained/epoch_{epoch+1}.pth')
+        
+        # Save Model
+        if best_mAP < mean_ap:
+            print("Val mAP improved from {:.3f} -> {:.3f}".format(best_mAP, mean_ap))
+            best_mAP = mean_ap
+ 
+            torch.save(model.state_dict(), f'{args["SAVE_DIR"]}/epoch_{epoch+1}.pth')
+            earlystopping_counter = 0
+
+        else:
+            earlystopping_counter += 1
+            print("Valid mAP did not improved from {:.3f}.. Counter {}/{}".format(best_mAP, earlystopping_counter, earlystopping_patience))
+            if earlystopping_counter > earlystopping_patience:
+                print("Early Stopped ...")
+                break
+        
+        scheduler.step(mean_ap)

@@ -9,9 +9,9 @@ log_config = dict(
         dict(type='WandbLoggerHook',
                 interval=1000,
                 init_kwargs=dict(
-                project='two-stage-model',
+                project= 'two-stage-model',
                 entity = 'canvas11',
-                name = 'LEE_cascade-rcnn-swins-512x512' ######
+                name = 'LEE_DetectoRS_cascade_rcnn_r50_1x' ######
             ),
         )
     ])
