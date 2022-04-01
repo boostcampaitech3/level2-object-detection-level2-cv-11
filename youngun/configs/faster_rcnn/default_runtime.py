@@ -10,7 +10,7 @@ log_config = dict(
                 init_kwargs=dict(
                 project='two-stage-model',
                 entity = 'canvas11',
-                name = 'KIM_faster-rcnn-aug-1024x1024'
+                name = 'KIM_faster-rcnn-focal-mosaic-1024x1024'
             ),
         )
     ])

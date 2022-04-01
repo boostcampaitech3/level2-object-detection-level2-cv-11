@@ -6,7 +6,7 @@ classes =['General trash','Paper','Paper pack','Metal','Glass','Plastic','Styrof
 
 img_scale=(1024, 1024)
 img_norm_cfg = dict(
-    mean=[0, 0, 0], std=[255., 255., 255.], to_rgb=True)
+    mean=[123.675, 116.28, 103.53], std=[58.395, 57.12, 57.375], to_rgb=True)
 
 albu_train_transforms = [
     dict(
@@ -35,7 +35,7 @@ train_pipeline = [
     # dict(type='LoadAnnotations', with_bbox=True),
     dict(type='Resize', img_scale=img_scale, keep_ratio=True),
     
-    #dict(type='Mosaic', img_scale=img_scale, pad_val=114.0),
+    dict(type='Mosaic', img_scale=img_scale),
     #dict(
     #    type='RandomAffine',
     #    scaling_ratio_range=(0.1, 2),
