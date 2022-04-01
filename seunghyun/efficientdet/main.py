@@ -10,8 +10,6 @@ from dataloader import MaskDataset
 from torch.utils.data import DataLoader
 
 def main(args, wandb):
-    train_annotation = '/opt/ml/detection/dataset/stratified_kfold/basic_v2/cv_train_3.json'
-    valid_annotation = '/opt/ml/detection/dataset/stratified_kfold/basic_v2/cv_val_3.json'
     data_dir = '/opt/ml/detection/dataset/'
         
     train_dataset = MaskDataset(args['TRAIN_ANN'], data_dir, get_train_transform())
@@ -36,9 +34,9 @@ if __name__ == '__main__':
             "Img scale: {}".format(args['IMG_SCALE']), "\n",
             "Batch size: {}".format(args['BATCH_SIZE']), "\n",
             "Learning rate: {}".format(args['LEARNING_RATE']), "\n",
+            "Fold: {}".format(args['SAVE_DIR']), "\n", 
             "===============================")
     
-    wandb.init(project="one-stage-model", entity="canvas11", name = f"LEE_EfficientDet_d3_512x512")
+    wandb.init(project="one-stage-model", entity="canvas11", name = args['WANDB_NAME'])
 
     main(args, wandb)
-    print('Done')
