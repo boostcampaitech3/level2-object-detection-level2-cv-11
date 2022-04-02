@@ -38,7 +38,8 @@ class MaskDataset(Dataset):
         boxes[:, 3] = boxes[:, 1] + boxes[:, 3]
         
         # box별 label
-        labels = np.array([x['category_id'] for x in anns])
+        labels = np.array([x['category_id']+1 for x in anns])
+
         labels = torch.as_tensor(labels, dtype=torch.int64)
         
         areas = np.array([x['area'] for x in anns])

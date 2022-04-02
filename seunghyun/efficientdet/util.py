@@ -38,7 +38,7 @@ def get_gt(GT_JSON):
         file_name = image_info['file_name']
 
         for annotation in annotation_info_list:
-            gt.append([file_name, annotation['category_id'],
+            gt.append([file_name, annotation['category_id']+1,
                        float(annotation['bbox'][0]),
                        float(annotation['bbox'][0]) + float(annotation['bbox'][2]),
                        float(annotation['bbox'][1]),

@@ -5,23 +5,23 @@ from tqdm import tqdm
 from torch.optim.lr_scheduler import ReduceLROnPlateau
 from map_boxes import mean_average_precision_for_boxes
 
-categories = ["General trash", "Paper", "Paper pack", "Metal", 
+categories = ["Background", "General trash", "Paper", "Paper pack", "Metal", 
               "Glass", "Plastic", "Styrofoam", "Plastic bag", "Battery", "Clothing"]
 
 
 def train(args, model, optimizer, train_data_loader, valid_data_loader, gt, wandb):
     scaler = torch.cuda.amp.GradScaler()
-    scheduler = ReduceLROnPlateau(optimizer, mode='max', factor=0.1, patience=5, verbose=True)
+    scheduler = ReduceLROnPlateau(optimizer, mode='max', factor=0.1, patience=6, verbose=True)
     device = 'cuda'
     loss_hist = Averager()
-    model.cuda()
+    model.cuda();
     best_mAP = 0.
     earlystopping_counter = 0
-    earlystopping_patience = 8
+    earlystopping_patience = 10
     
     if not os.path.exists('./pretrained'):
-        os.makedirs('./pretrained')  
-
+        os.makedirs('./pretrained')    
+    
     if not os.path.exists(args['SAVE_DIR']):
         os.makedirs(args['SAVE_DIR'])
     
