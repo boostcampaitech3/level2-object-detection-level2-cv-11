@@ -11,7 +11,7 @@ log_config = dict(
                 init_kwargs=dict(
                 project= 'two-stage-model',
                 entity = 'canvas11',
-                name = 'LEE_DetectoRS_cascade_rcnn_r50_1x' ######
+                name = 'LEE_DetectoRS_cascade_rcnn_r50_1x_Mosaic_finetune' ######
             ),
         )
     ])
