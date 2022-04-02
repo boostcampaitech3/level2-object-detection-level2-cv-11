@@ -1,5 +1,4 @@
-checkpoint_config = dict(max_keep_ckpts=5, interval=1) #### 최근 5개 모델만 저장
-
+checkpoint_config = dict(interval=1)
 # yapf:disable
 log_config = dict(
     interval=50,
@@ -9,9 +8,9 @@ log_config = dict(
         dict(type='WandbLoggerHook',
                 interval=1000,
                 init_kwargs=dict(
-                project= 'two-stage-model',
+                project='two-stage-model',
                 entity = 'canvas11',
-                name = 'LEE_DetectoRS_cascade_rcnn_r50_1x' ######
+                name = 'KIM_faster-rcnn-focal-mosaic-1024x1024'
             ),
         )
     ])

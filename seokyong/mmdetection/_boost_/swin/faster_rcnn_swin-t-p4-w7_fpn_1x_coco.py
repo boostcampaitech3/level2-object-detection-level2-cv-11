@@ -1,12 +1,12 @@
 _base_ = [
-    '../models/cascade_rcnn_r50_fpn.py', ############## # Detector + Backbone 교체 완료
-    '../datasets/coco_detection.py', ##############
-    '../schedules/schedule_1x.py', '../default_runtime.py'
+    '../_base_/models/faster_rcnn_r50_fpn.py',
+    '../_base_/datasets/coco_detection.py',
+    '../_base_/schedules/schedule_custom.py', '../_base_/default_runtime.py'
 ]
 pretrained = 'https://github.com/SwinTransformer/storage/releases/download/v1.0.0/swin_tiny_patch4_window7_224.pth'  # noqa
 model = dict(
     backbone=dict(
-        _delete_=True, ############## => 기존 backbone에서는 ResNet backbone을 사용. 기존 작성된 backbone의 config를 삭제한다는 의미
+        _delete_=True,
         type='SwinTransformer',
         embed_dims=96,
         depths=[2, 2, 6, 2],
@@ -22,11 +22,20 @@ model = dict(
         out_indices=(0, 1, 2, 3),
         with_cp=False,
         convert_weights=True,
-        init_cfg=dict(type='Pretrained', checkpoint=pretrained)), ############## pretrained weight
-    neck=dict(in_channels=[96, 192, 384, 768])) ############## neck 부분 굉장히 중요
+        init_cfg=dict(type='Pretrained', checkpoint=pretrained)),
+    neck=dict(in_channels=[96, 192, 384, 768]),
+    # CE Loss -> Focal Loss
+    # roi_head=dict(
+    #     bbox_head=dict(
+    #         loss_cls=dict(type='FocalLoss', use_sigmoid=True, loss_weight=1.0)
+    #     )
+    # )
+)
+img_norm_cfg = dict(
+    mean=[123.675, 116.28, 103.53], std=[58.395, 57.12, 57.375], to_rgb=True)
 
 optimizer = dict(
-    _delete_=True, ##############
+    _delete_=True,
     type='AdamW',
     lr=0.0001,
     betas=(0.9, 0.999),
@@ -37,5 +46,5 @@ optimizer = dict(
             'relative_position_bias_table': dict(decay_mult=0.),
             'norm': dict(decay_mult=0.)
         }))
-lr_config = dict(warmup_iters=1000, step=[8, 11])
-runner = dict(max_epochs=20) ######
+lr_config = dict(policy='CosineAnnealing', warmup_iters=1000)
+runner = dict(max_epochs=30)

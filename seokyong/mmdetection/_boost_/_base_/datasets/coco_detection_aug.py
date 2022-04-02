@@ -8,7 +8,7 @@ classes = ("General trash", "Paper", "Paper pack", "Metal", "Glass",
 img_norm_cfg = dict(
     mean=[123.675, 116.28, 103.53], std=[58.395, 57.12, 57.375], to_rgb=True)
 
-img_scale = (800, 800) #####
+img_scale = (1024, 1024)
 
 albu_train_transforms = [
     dict(
@@ -38,8 +38,7 @@ train_pipeline = [
     dict(type='LoadAnnotations', with_bbox=True),
     dict(type='Resize', img_scale=img_scale, keep_ratio=True),
     dict(type='RandomFlip', flip_ratio=0.0), #### => 없애면 에러나는듯 https://github.com/open-mmlab/mmdetection/issues/3359
-    # dict(type='Resize', img_scale=[(768 + 32 * i, 768 + 32 * i) for i in range(9)], multiscale_mode='value'),
-    dict( 
+    dict(
         type='Albu',
         transforms=albu_train_transforms,
         bbox_params=dict(
@@ -50,6 +49,7 @@ train_pipeline = [
             filter_lost_elements=True),
         keymap={
             'img': 'image',
+            # 'gt_masks': 'masks',
             'gt_bboxes': 'bboxes'
         },
         update_pad_shape=False,
@@ -94,17 +94,17 @@ test_pipeline = [
 
 data = dict(
     samples_per_gpu=8,
-    workers_per_gpu=2,
+    workers_per_gpu=4,
     train=dict(
         type=dataset_type,
         classes = classes, ###########
-        ann_file=data_root + 'stratified_kfold/basic_v2/cv_train_3.json', ###########
+        ann_file=data_root + 'kfold/cv_train_3.json', ###########
         img_prefix=data_root,  ###########
         pipeline=train_pipeline),
     val=dict(
         type=dataset_type,
         classes = classes, ###########
-        ann_file=data_root + 'stratified_kfold/basic_v2/cv_val_3.json', ###########
+        ann_file=data_root + 'kfold/cv_val_3.json', ###########
         img_prefix=data_root, ###########
         pipeline=val_pipeline),
     test=dict(
