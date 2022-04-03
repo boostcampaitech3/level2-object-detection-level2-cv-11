@@ -13,4 +13,8 @@ model = dict(
         norm_cfg=dict(type='BN', requires_grad=True),
         style='pytorch',
         init_cfg=dict(
-            type='Pretrained', checkpoint='open-mmlab://resnext101_64x4d')))
+            type='Pretrained', checkpoint='open-mmlab://resnext101_64x4d')),
+    rpn_head=dict(
+        loss_cls=dict(
+            type='FocalLoss', use_sigmoid=True, loss_weight=1.0))
+    )

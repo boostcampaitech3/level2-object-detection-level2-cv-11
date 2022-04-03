@@ -4,7 +4,7 @@ data_root = '/opt/ml/detection/dataset/'
 ann_root = '/opt/ml/_boost_/stratified_kfold/basic_v2/'
 classes =['General trash','Paper','Paper pack','Metal','Glass','Plastic','Styrofoam','Plastic bag','Battery','Clothing']
 
-img_scale=(1024, 1024)
+img_scale=(512, 512)
 img_norm_cfg = dict(
     mean=[123.675, 116.28, 103.53], std=[58.395, 57.12, 57.375], to_rgb=True)
 
