@@ -76,7 +76,7 @@ val_pipeline = [
         ])
 ]
 
-tta_img_scale = [(1024, 1024), (1024, 768), (768, 1024), (768, 768)]
+tta_img_scale = [(1024, 1024), (1024, 512), (512, 1024), (512, 512)]
 
 test_pipeline = [
     dict(type='LoadImageFromFile'),
