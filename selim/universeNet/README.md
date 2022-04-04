@@ -67,6 +67,6 @@ grouped OneOf by '[]'
 | 5 | 기본 baseline + changed aug  | RandomSizedBBoxSafeCrop(erosion_rate 0.3) + same as #3 | fold 5  | little bad graph |
 |  |  |  |  |  |
 
-![스크린샷 2022-04-04 오전 11 48 07](https://user-images.githubusercontent.com/68208055/161465931-fb24d216-5460-4850-a3eb-0495d7242930.png)
 
+![스크린샷 2022-04-04 오후 12 03 11](https://user-images.githubusercontent.com/68208055/161467050-ca8639d4-2c4e-4f1d-b7de-30bba4eedc1f.png)
 
