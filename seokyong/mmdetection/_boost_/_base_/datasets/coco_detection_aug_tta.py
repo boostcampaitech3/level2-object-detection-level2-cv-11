@@ -76,7 +76,7 @@ val_pipeline = [
         ])
 ]
 
-tta_img_scale = [(1024, 1024), (1024, 512), (512, 1024), (512, 512)]
+tta_img_scale = [(1024, 1024), (512, 512)]
 
 test_pipeline = [
     dict(type='LoadImageFromFile'),
@@ -84,6 +84,7 @@ test_pipeline = [
         type='MultiScaleFlipAug',
         img_scale=tta_img_scale,
         flip=True,
+        flip_direction = ['horizontal', 'vertical', 'diagonal'],
         transforms=[
             dict(type='Resize', keep_ratio=True),
             dict(type='RandomFlip'),
