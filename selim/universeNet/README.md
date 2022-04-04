@@ -50,13 +50,13 @@ resume_from = '/opt/ml/UniverseNet/work_dirs/univ_base_3/epoch_1.pth' # Default=
 코드 자주 고치다보면 예전 파라미터가 궁금해질 때가 있는데 이부분을 참고하면 좋다. 
 
 ### 학습 과정 
-
+grouped OneOf by '[]'
 
 | id | Summary | Aug | va | test mAP |
 | --- | --- | --- | --- | --- |
 | 1 | 기본 baseline  | multi_scale_resize, [VerticalFlip, HorizontalFlip], [GaussNoise, GaussianBlur, Blur], [RandomGamma, HueSaturationValue, ChannelDropout, ChannelShuffle, RGBShift], [ShiftScaleRotate, RandomRotate90] | fold 1  | 0.6128 |
 | 2 | 기본 baseline + changed aug | multi_scale_resize, [Flip, RandomRotate90], [RandomBrightnessContrast, HueSaturationValue, GaussNoise], [Blur, GaussianBlur, MedianBlur, MotionBlur] | fold 3 |  |
-| 3 | SGD Optimizer + changed aug | multi_scale_resize, [HorizontalFlip, VerticalFlip, Affine, ShiftScaleRotate], [RGBShift, ToGray, HueSaturationValue< RandomBrightnessContrast], [Blur, MedianBlur], [CLAHE, Sharpen], Emboss | fold 4  | 0.6231 |
+| 3 | SGD Optimizer + changed aug | multi_scale_resize, [HorizontalFlip, VerticalFlip, Affine, ShiftScaleRotate], [RGBShift, ToGray, HueSaturationValue, RandomBrightnessContrast], [Blur, MedianBlur], [CLAHE, Sharpen], Emboss | fold 4  | 0.6231 |
 | 4 | changed baseline(Res2Net101 → ResNet50) | same as #3  | fold 5 | bad graph  |
 | 5 | 기본 baseline + changed aug  | RandomSizedBBoxSafeCrop(erosion_rate 0.3) + same as #3 | fold 5  | little bad graph |
 |  |  |  |  |  |
