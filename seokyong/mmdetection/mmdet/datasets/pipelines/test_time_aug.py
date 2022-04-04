@@ -221,7 +221,7 @@ class CustomAug:
             flip_args += [(True, direction)
                           for direction in self.flip_direction]
         if self.distortion:
-            distortion_args += [True for d in range(1)] # 2번 추가(random distortion)
+            distortion_args += [True for d in range(2)] # 2번 추가(random distortion 횟수)
         for scale in self.img_scale:
             for flip, direction in flip_args:
                 for dist in distortion_args:
