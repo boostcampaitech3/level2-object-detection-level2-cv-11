@@ -65,6 +65,7 @@ grouped OneOf by '[]'
 | 3 | SGD Optimizer + changed aug | multi_scale_resize, [HorizontalFlip, VerticalFlip, Affine, ShiftScaleRotate], [RGBShift, ToGray, HueSaturationValue, RandomBrightnessContrast], [Blur, MedianBlur], [CLAHE, Sharpen], Emboss | fold 4  | 0.6231 |
 | 4 | changed baseline(Res2Net101 → ResNet50) | same as #3  | fold 5 | bad graph  |
 | 5 | 기본 baseline + changed aug  | RandomSizedBBoxSafeCrop(erosion_rate 0.3) + same as #3 | fold 5  | little bad graph |
+| 6 | 기본 baseline but save best mAP_s | same as #3 | fold 3 | best epoch at 2 |
 |  |  |  |  |  |
 
 
