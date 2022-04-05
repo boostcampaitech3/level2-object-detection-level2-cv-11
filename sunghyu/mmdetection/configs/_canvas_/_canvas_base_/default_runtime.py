@@ -1,18 +1,10 @@
-checkpoint_config = dict(interval=5, max_keep_ckpts=3) # 최근 3개 모델 저장
+checkpoint_config = dict(interval=1)
 # yapf:disable
 log_config = dict(
     interval=50,
     hooks=[
         dict(type='TextLoggerHook'),
         # dict(type='TensorboardLoggerHook')
-        dict(type='WandbLoggerHook',
-                interval=1000,
-                init_kwargs=dict(
-                project='two-stage-model',
-                entity = 'canvas11',
-                name = 'KIM_faster-rcnn-focal-mosaic-512x512'
-            ),
-        )
     ])
 # yapf:enable
 custom_hooks = [dict(type='NumClassCheckHook')]
