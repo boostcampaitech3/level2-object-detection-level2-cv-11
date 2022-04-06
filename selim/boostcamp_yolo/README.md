@@ -15,8 +15,9 @@ SGD가 기본 optimizer function
 | 7 | 5fold - #4 epoch 60  img 480 | 0.522 |  |
 | 8 | 5fold - #5 epoch 80 img 1024 | 0.501 | 0.4185 |
 | 9 | 5fold ensemble |  | 0.5860 |
-| 10  | 8fold ensemble |  | 0.6025(!) |
+| 10  | 8fold ensemble |  | 0.6025 |
 | 11 | Changed to AdamW epoch 100 img 1024 | 0.490 |  |
+| 12 | 5 fold ensemble with pseudo code | | 0.6071(!) | 
 
 
 ## 폴더 트리
