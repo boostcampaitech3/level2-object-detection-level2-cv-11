@@ -1,5 +1,24 @@
 # YOLOv5
 
+## 실험 기록 
+
+SGD가 기본 optimizer function 
+
+| id | Summary | valid mAP | testmAP |
+| --- | --- | --- | --- |
+| 1 | epoch 60 img 512 | 0.549 | 0.4543 |
+| 2 | epoch 30 img 1024 | 0.543 | 0.4646 |
+| 3 | epoch 60 img 1024 | 0.538 | 0.4301 |
+| 4 | 5fold - #1  epoch 100 img 1024 | 0.544 |  |
+| 5 | 5fold - #2 epoch 60 img 480 | 0.518 |  |
+| 6 | 5fold - #3 epoch 80 img 640 | 0.540 | 0.4015 |
+| 7 | 5fold - #4 epoch 60  img 480 | 0.522 |  |
+| 8 | 5fold - #5 epoch 80 img 1024 | 0.501 | 0.4185 |
+| 9 | 5fold ensemble |  | 0.5860 |
+| 10  | 8fold ensemble |  | 0.6025(!) |
+| 11 | Changed to AdamW epoch 100 img 1024 | 0.490 |  |
+
+
 ## 폴더 트리
 
 ‘*’ 직접 만들어야 하는 거 git에 올려놓을 예정 
