@@ -5,6 +5,8 @@
 UniverseNets are state-of-the-art detectors for universal-scale object detection. 
 Please refer to our paper for details. https://arxiv.org/abs/2103.14027
 
+UniverseNet을 실행하려면 mmdetection과 같은 동작방식임에도 따로 깃헙에서 클론해 라이브러리를 설치해야 한다. 
+conda 가상환경이 필요하므로 주의. 
 
 ### 해당 도메인에 적합하게 바꾸면서 유의한 점 
 - boostcamp 데이터셋은 COCO데이터셋과 다른 classes number (80->10)
@@ -71,3 +73,17 @@ grouped OneOf by '[]'
 
 ![스크린샷 2022-04-04 오후 12 03 11](https://user-images.githubusercontent.com/68208055/161467050-ca8639d4-2c4e-4f1d-b7de-30bba4eedc1f.png)
 
+
+## Deformable DETR 
+
+pytorch 1.11 이상에서만 실행할 수 있는 것 같다. 
+서버 할당된 걸 그대로 쓰면 파이토치 때문에 오류가 날 수 있다. 
+
+### Deformable DETR 학습 과정  
+| id | Summary | Aug | va | test mAP |
+| --- | --- | --- | --- | --- |
+| 1 | 기본 baseline + AdamW | RandomSizedBBoxSafeCrop(erosion_rate 0.3) + best aug | fold 3 | 0.394 |
+| 2 | 기본 baseline + AdamW | best aug | fold 1 | 0.464 |
+| 3 | 기본 baseline + SGD | best aug | fold 2 | 0 |
+
+SGD는 이상하게 하나도 안 보였다. 
