@@ -3,7 +3,7 @@ _base_ = [
     '../_base_/schedules/schedule_1x.py', '../_base_/default_runtime.py'
 ]
 
-pretrained = 'https://github.com/SwinTransformer/storage/releases/download/v1.0.0/swin_small_patch4_window7_224.pth'  # noqa
+pretrained = 'https://github.com/SwinTransformer/storage/releases/download/v1.0.0/swin_large_patch4_window7_224_22k.pth'  # noqa
 
 # model settings
 model = dict(
@@ -11,9 +11,9 @@ model = dict(
     backbone=dict(
         # _delete_=True,
         type='SwinTransformer',
-        embed_dims=96,
+        embed_dims=192,
         depths=[2, 2, 18, 2],
-        num_heads=[3, 6, 12, 24],
+        num_heads=[6, 12, 24, 48],
         window_size=7,
         mlp_ratio=4,
         qkv_bias=True,
@@ -28,7 +28,7 @@ model = dict(
         init_cfg=dict(type='Pretrained', checkpoint=pretrained)),
     neck=dict(
         type='FPN',
-        in_channels=[96, 192, 384, 768], # [256, 512, 1024, 2048],
+        in_channels=[192, 384, 768, 1536], # [256, 512, 1024, 2048],
         out_channels=256,
         num_outs=5),
     rpn_head=dict(
@@ -37,7 +37,7 @@ model = dict(
         feat_channels=256,
         anchor_generator=dict(
             type='AnchorGenerator',
-            scales=[8],
+            scales=[2, 4, 8],
             ratios=[0.5, 1.0, 2.0],
             strides=[4, 8, 16, 32, 64]),
         bbox_coder=dict(
@@ -60,8 +60,11 @@ model = dict(
             featmap_strides=[4, 8, 16, 32]),
         bbox_head=[
             dict(
-                type='Shared2FCBBoxHead',
+                type='ConvFCBBoxHead',
+                num_shared_convs=4,
+                num_shared_fcs=1,
                 in_channels=256,
+                conv_out_channels=256,
                 fc_out_channels=1024,
                 roi_feat_size=7,
                 num_classes=10,
@@ -69,16 +72,18 @@ model = dict(
                     type='DeltaXYWHBBoxCoder',
                     target_means=[0., 0., 0., 0.],
                     target_stds=[0.1, 0.1, 0.2, 0.2]),
-                reg_class_agnostic=True,
+                reg_class_agnostic=False,
+                reg_decoded_bbox=True,
+                norm_cfg=dict(type='BN', requires_grad=True),
                 loss_cls=dict(
-                    type='CrossEntropyLoss',
-                    use_sigmoid=False,
-                    loss_weight=1.0),
-                loss_bbox=dict(type='SmoothL1Loss', beta=1.0,
-                               loss_weight=1.0)),
+                    type='CrossEntropyLoss', use_sigmoid=False, loss_weight=1.0),
+                loss_bbox=dict(type='GIoULoss', loss_weight=10.0)),
             dict(
-                type='Shared2FCBBoxHead',
+                type='ConvFCBBoxHead',
+                num_shared_convs=4,
+                num_shared_fcs=1,
                 in_channels=256,
+                conv_out_channels=256,
                 fc_out_channels=1024,
                 roi_feat_size=7,
                 num_classes=10,
@@ -86,16 +91,18 @@ model = dict(
                     type='DeltaXYWHBBoxCoder',
                     target_means=[0., 0., 0., 0.],
                     target_stds=[0.05, 0.05, 0.1, 0.1]),
-                reg_class_agnostic=True,
+                reg_class_agnostic=False,
+                reg_decoded_bbox=True,
+                norm_cfg=dict(type='BN', requires_grad=True),
                 loss_cls=dict(
-                    type='CrossEntropyLoss',
-                    use_sigmoid=False,
-                    loss_weight=1.0),
-                loss_bbox=dict(type='SmoothL1Loss', beta=1.0,
-                               loss_weight=1.0)),
+                    type='CrossEntropyLoss', use_sigmoid=False, loss_weight=1.0),
+                loss_bbox=dict(type='GIoULoss', loss_weight=10.0)),
             dict(
-                type='Shared2FCBBoxHead',
+                type='ConvFCBBoxHead',
+                num_shared_convs=4,
+                num_shared_fcs=1,
                 in_channels=256,
+                conv_out_channels=256,
                 fc_out_channels=1024,
                 roi_feat_size=7,
                 num_classes=10,
@@ -103,14 +110,14 @@ model = dict(
                     type='DeltaXYWHBBoxCoder',
                     target_means=[0., 0., 0., 0.],
                     target_stds=[0.033, 0.033, 0.067, 0.067]),
-                reg_class_agnostic=True,
+                reg_class_agnostic=False,
+                reg_decoded_bbox=True,
+                norm_cfg=dict(type='BN', requires_grad=True),
                 loss_cls=dict(
-                    type='CrossEntropyLoss',
-                    use_sigmoid=False,
-                    loss_weight=1.0),
-                loss_bbox=dict(type='SmoothL1Loss', beta=1.0, loss_weight=1.0))
-        ]
-    ),
+                    type='CrossEntropyLoss', use_sigmoid=False, loss_weight=1.0),
+                loss_bbox=dict(type='GIoULoss', loss_weight=10.0))
+            ]
+        ),
     # model training and testing settings   
     train_cfg=dict(
         rpn=dict(
@@ -210,12 +217,12 @@ optimizer = dict(
             'relative_position_bias_table': dict(decay_mult=0.),
             'norm': dict(decay_mult=0.)
         }))
-data = dict(samples_per_gpu=8, workers_per_gpu=4)
+data = dict(samples_per_gpu=12, workers_per_gpu=4)
 lr_config = dict(
     policy='CosineAnnealing',
     warmup='linear',
-    warmup_iters=1200, # 1 epoch (batch: 4->976, 8->488) | Pseudo (batch 8->913)
+    warmup_iters=700, # 1 epoch (batch: 4->976, 8->488) | Pseudo (batch 8->913)
     warmup_ratio=0.001,
     min_lr=1e-06
     )
-runner = dict(type='EpochBasedRunner', max_epochs=28)
+runner = dict(type='EpochBasedRunner', max_epochs=34)

@@ -64,7 +64,7 @@ val_pipeline = [
     dict(type='LoadImageFromFile'),
     dict(
         type='MultiScaleFlipAug',
-        img_scale=img_scale,
+        img_scale=(1024, 1024),
         flip=False,
         transforms=[
             dict(type='Resize', keep_ratio=True),
@@ -91,7 +91,7 @@ test_pipeline = [
             dict(type='RandomFlip'),
             dict(type='PhotoMetricDistortion'),
             dict(type='Normalize', **img_norm_cfg),
-            dict(type='Pad', size_divisor=32), 
+            dict(type='Pad', size_divisor=32), ## 한번 빼 보기
             dict(type='ImageToTensor', keys=['img']),
             dict(type='Collect', keys=['img']),
         ])
@@ -103,13 +103,13 @@ data = dict(
     train=dict(
         type=dataset_type,
         classes = classes, ###########
-        ann_file=data_root + 'Pseudo/train1_pseudo.json', ###########
+        ann_file=data_root + 'all_data_with_pseudo.json', ###########
         img_prefix=data_root,  ###########
         pipeline=train_pipeline),
     val=dict(
         type=dataset_type,
         classes = classes, ###########
-        ann_file=data_root + 'Pseudo/cv_val_1.json', ###########
+        ann_file=data_root + 'kfold/cv_val_3.json', ###########
         img_prefix=data_root, ###########
         pipeline=val_pipeline),
     test=dict(
