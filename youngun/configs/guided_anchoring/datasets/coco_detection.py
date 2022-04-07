@@ -97,7 +97,7 @@ test_pipeline = [
 ]
 
 data = dict(
-    samples_per_gpu=6,
+    samples_per_gpu=5,
     workers_per_gpu=2,
     train=train_dataset,
     val=dict(

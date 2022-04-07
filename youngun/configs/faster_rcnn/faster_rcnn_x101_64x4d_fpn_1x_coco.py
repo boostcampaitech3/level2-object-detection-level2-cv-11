@@ -14,7 +14,12 @@ model = dict(
         style='pytorch',
         init_cfg=dict(
             type='Pretrained', checkpoint='open-mmlab://resnext101_64x4d')),
-    rpn_head=dict(
-        loss_cls=dict(
-            type='FocalLoss', use_sigmoid=True, loss_weight=1.0))
+    # rpn_head=dict(
+    #     loss_cls=dict(
+    #         type='FocalLoss', use_sigmoid=True, loss_weight=1.0))
+    # roi_head=dict(
+    #     bbox_head=dict(
+    #         loss_bbox=dict(type='IoULoss', loss_weight=1.0)
+    #         )
+    #     )
     )
