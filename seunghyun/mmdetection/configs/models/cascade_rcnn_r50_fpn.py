@@ -22,7 +22,7 @@ model = dict(
         feat_channels=256,
         anchor_generator=dict(
             type='AnchorGenerator',
-            scales=[8],
+            scales=[8], ####################### default=[8]
             ratios=[0.5, 1.0, 2.0],
             strides=[4, 8, 16, 32, 64]),
         bbox_coder=dict(

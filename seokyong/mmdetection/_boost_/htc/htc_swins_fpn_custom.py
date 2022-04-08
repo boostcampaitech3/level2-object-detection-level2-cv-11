@@ -1,5 +1,5 @@
 _base_ = [
-    '../_base_/datasets/coco_detection_aug.py',
+    '../_base_/datasets/coco_detection_aug_tta.py',
     '../_base_/schedules/schedule_1x.py', '../_base_/default_runtime.py'
 ]
 
@@ -214,8 +214,8 @@ data = dict(samples_per_gpu=8, workers_per_gpu=4)
 lr_config = dict(
     policy='CosineAnnealing',
     warmup='linear',
-    warmup_iters=488, # 1 epoch (batch: 4->976, 8->488)
+    warmup_iters=1200, # 1 epoch (batch: 4->976, 8->488) | Pseudo (batch 8->913)
     warmup_ratio=0.001,
     min_lr=1e-06
     )
-runner = dict(type='EpochBasedRunner', max_epochs=24)
+runner = dict(type='EpochBasedRunner', max_epochs=28)

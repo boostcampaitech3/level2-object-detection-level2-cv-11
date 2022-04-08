@@ -16,7 +16,7 @@ optimizer_config = dict(grad_clip=None)
 lr_config = dict(
     policy='CosineAnnealing',
     warmup='linear',
-    warmup_iters=488, # total train images / batch  => 1 Epoch
+    warmup_iters=2442, # total train images / batch  => 1 Epoch #### batch8: 488, batch 4: 976, batch 1: 3901, batch 2: 1951 
     warmup_ratio=0.001,
     min_lr=1e-06)
 

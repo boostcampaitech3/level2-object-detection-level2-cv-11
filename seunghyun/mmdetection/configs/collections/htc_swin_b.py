@@ -1,10 +1,11 @@
 _base_ = [
     '../models/htc_without_semantic_r50_fpn_1x_coco_rpn_changed.py', ############## # Detector + Backbone 교체 완료
-    '../datasets/coco_detection.py', ##############
+    '../datasets/coco_detection_mosaic.py', ##############
     '../schedules/schedule_3x.py', '../default_runtime.py'
 ]
 
 #####
+#
 pretrained = (
     "https://github.com/SwinTransformer/storage/releases/download/v1.0.0/swin_base_patch4_window7_224_22k.pth"  # noqa
 )
