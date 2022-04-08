@@ -1,0 +1,2738 @@
+2022-03-30 15:26:55,047 - mmdet - INFO - Environment info:
+------------------------------------------------------------
+sys.platform: linux
+Python: 3.7.11 (default, Jul 27 2021, 14:32:16) [GCC 7.5.0]
+CUDA available: True
+GPU 0: Tesla V100-PCIE-32GB
+CUDA_HOME: None
+GCC: gcc (Ubuntu 7.5.0-3ubuntu1~18.04) 7.5.0
+PyTorch: 1.7.1
+PyTorch compiling details: PyTorch built with:
+  - GCC 7.3
+  - C++ Version: 201402
+  - Intel(R) oneAPI Math Kernel Library Version 2021.4-Product Build 20210904 for Intel(R) 64 architecture applications
+  - Intel(R) MKL-DNN v1.6.0 (Git Hash 5ef631a030a6f73131c77892041042805a06064f)
+  - OpenMP 201511 (a.k.a. OpenMP 4.5)
+  - NNPACK is enabled
+  - CPU capability usage: AVX2
+  - CUDA Runtime 11.0
+  - NVCC architecture flags: -gencode;arch=compute_37,code=sm_37;-gencode;arch=compute_50,code=sm_50;-gencode;arch=compute_60,code=sm_60;-gencode;arch=compute_61,code=sm_61;-gencode;arch=compute_70,code=sm_70;-gencode;arch=compute_75,code=sm_75;-gencode;arch=compute_80,code=sm_80;-gencode;arch=compute_37,code=compute_37
+  - CuDNN 8.0.5
+  - Magma 2.5.2
+  - Build settings: BLAS=MKL, BUILD_TYPE=Release, CXX_FLAGS= -Wno-deprecated -fvisibility-inlines-hidden -DUSE_PTHREADPOOL -fopenmp -DNDEBUG -DUSE_FBGEMM -DUSE_QNNPACK -DUSE_PYTORCH_QNNPACK -DUSE_XNNPACK -DUSE_VULKAN_WRAPPER -O2 -fPIC -Wno-narrowing -Wall -Wextra -Werror=return-type -Wno-missing-field-initializers -Wno-type-limits -Wno-array-bounds -Wno-unknown-pragmas -Wno-sign-compare -Wno-unused-parameter -Wno-unused-variable -Wno-unused-function -Wno-unused-result -Wno-unused-local-typedefs -Wno-strict-overflow -Wno-strict-aliasing -Wno-error=deprecated-declarations -Wno-stringop-overflow -Wno-psabi -Wno-error=pedantic -Wno-error=redundant-decls -Wno-error=old-style-cast -fdiagnostics-color=always -faligned-new -Wno-unused-but-set-variable -Wno-maybe-uninitialized -fno-math-errno -fno-trapping-math -Werror=format -Wno-stringop-overflow, PERF_WITH_AVX=1, PERF_WITH_AVX2=1, PERF_WITH_AVX512=1, USE_CUDA=ON, USE_EXCEPTION_PTR=1, USE_GFLAGS=OFF, USE_GLOG=OFF, USE_MKL=ON, USE_MKLDNN=ON, USE_MPI=OFF, USE_NCCL=ON, USE_NNPACK=ON, USE_OPENMP=ON, 
+
+TorchVision: 0.8.2
+OpenCV: 4.5.5
+MMCV: 1.4.6
+MMCV Compiler: GCC 7.3
+MMCV CUDA Compiler: 11.0
+MMDetection: 2.22.0+
+------------------------------------------------------------
+
+2022-03-30 15:26:56,555 - mmdet - INFO - Distributed training: False
+2022-03-30 15:26:57,918 - mmdet - INFO - Config:
+model = dict(
+    type='CascadeRCNN',
+    backbone=dict(
+        type='SwinTransformer',
+        embed_dims=96,
+        depths=[2, 2, 18, 2],
+        num_heads=[3, 6, 12, 24],
+        window_size=7,
+        mlp_ratio=4,
+        qkv_bias=True,
+        qk_scale=None,
+        drop_rate=0.0,
+        attn_drop_rate=0.0,
+        drop_path_rate=0.2,
+        patch_norm=True,
+        out_indices=(0, 1, 2, 3),
+        with_cp=False,
+        convert_weights=True,
+        init_cfg=dict(
+            type='Pretrained',
+            checkpoint=
+            'https://github.com/SwinTransformer/storage/releases/download/v1.0.0/swin_small_patch4_window7_224.pth'
+        )),
+    neck=dict(
+        type='FPN',
+        in_channels=[96, 192, 384, 768],
+        out_channels=256,
+        num_outs=5),
+    rpn_head=dict(
+        type='RPNHead',
+        in_channels=256,
+        feat_channels=256,
+        anchor_generator=dict(
+            type='AnchorGenerator',
+            scales=[8],
+            ratios=[0.5, 1.0, 2.0],
+            strides=[4, 8, 16, 32, 64]),
+        bbox_coder=dict(
+            type='DeltaXYWHBBoxCoder',
+            target_means=[0.0, 0.0, 0.0, 0.0],
+            target_stds=[1.0, 1.0, 1.0, 1.0]),
+        loss_cls=dict(
+            type='CrossEntropyLoss', use_sigmoid=True, loss_weight=1.0),
+        loss_bbox=dict(
+            type='SmoothL1Loss', beta=0.1111111111111111, loss_weight=1.0)),
+    roi_head=dict(
+        type='CascadeRoIHead',
+        num_stages=3,
+        stage_loss_weights=[1, 0.5, 0.25],
+        bbox_roi_extractor=dict(
+            type='SingleRoIExtractor',
+            roi_layer=dict(type='RoIAlign', output_size=7, sampling_ratio=0),
+            out_channels=256,
+            featmap_strides=[4, 8, 16, 32]),
+        bbox_head=[
+            dict(
+                type='Shared2FCBBoxHead',
+                in_channels=256,
+                fc_out_channels=1024,
+                roi_feat_size=7,
+                num_classes=2,
+                bbox_coder=dict(
+                    type='DeltaXYWHBBoxCoder',
+                    target_means=[0.0, 0.0, 0.0, 0.0],
+                    target_stds=[0.1, 0.1, 0.2, 0.2]),
+                reg_class_agnostic=True,
+                loss_cls=dict(
+                    type='CrossEntropyLoss',
+                    use_sigmoid=False,
+                    loss_weight=1.0),
+                loss_bbox=dict(type='SmoothL1Loss', beta=1.0,
+                               loss_weight=1.0)),
+            dict(
+                type='Shared2FCBBoxHead',
+                in_channels=256,
+                fc_out_channels=1024,
+                roi_feat_size=7,
+                num_classes=2,
+                bbox_coder=dict(
+                    type='DeltaXYWHBBoxCoder',
+                    target_means=[0.0, 0.0, 0.0, 0.0],
+                    target_stds=[0.05, 0.05, 0.1, 0.1]),
+                reg_class_agnostic=True,
+                loss_cls=dict(
+                    type='CrossEntropyLoss',
+                    use_sigmoid=False,
+                    loss_weight=1.0),
+                loss_bbox=dict(type='SmoothL1Loss', beta=1.0,
+                               loss_weight=1.0)),
+            dict(
+                type='Shared2FCBBoxHead',
+                in_channels=256,
+                fc_out_channels=1024,
+                roi_feat_size=7,
+                num_classes=2,
+                bbox_coder=dict(
+                    type='DeltaXYWHBBoxCoder',
+                    target_means=[0.0, 0.0, 0.0, 0.0],
+                    target_stds=[0.033, 0.033, 0.067, 0.067]),
+                reg_class_agnostic=True,
+                loss_cls=dict(
+                    type='CrossEntropyLoss',
+                    use_sigmoid=False,
+                    loss_weight=1.0),
+                loss_bbox=dict(type='SmoothL1Loss', beta=1.0, loss_weight=1.0))
+        ]),
+    train_cfg=dict(
+        rpn=dict(
+            assigner=dict(
+                type='MaxIoUAssigner',
+                pos_iou_thr=0.7,
+                neg_iou_thr=0.3,
+                min_pos_iou=0.3,
+                match_low_quality=True,
+                ignore_iof_thr=-1),
+            sampler=dict(
+                type='RandomSampler',
+                num=256,
+                pos_fraction=0.5,
+                neg_pos_ub=-1,
+                add_gt_as_proposals=False),
+            allowed_border=0,
+            pos_weight=-1,
+            debug=False),
+        rpn_proposal=dict(
+            nms_pre=2000,
+            max_per_img=2000,
+            nms=dict(type='nms', iou_threshold=0.7),
+            min_bbox_size=0),
+        rcnn=[
+            dict(
+                assigner=dict(
+                    type='MaxIoUAssigner',
+                    pos_iou_thr=0.5,
+                    neg_iou_thr=0.5,
+                    min_pos_iou=0.5,
+                    match_low_quality=False,
+                    ignore_iof_thr=-1),
+                sampler=dict(
+                    type='RandomSampler',
+                    num=512,
+                    pos_fraction=0.25,
+                    neg_pos_ub=-1,
+                    add_gt_as_proposals=True),
+                pos_weight=-1,
+                debug=False),
+            dict(
+                assigner=dict(
+                    type='MaxIoUAssigner',
+                    pos_iou_thr=0.6,
+                    neg_iou_thr=0.6,
+                    min_pos_iou=0.6,
+                    match_low_quality=False,
+                    ignore_iof_thr=-1),
+                sampler=dict(
+                    type='RandomSampler',
+                    num=512,
+                    pos_fraction=0.25,
+                    neg_pos_ub=-1,
+                    add_gt_as_proposals=True),
+                pos_weight=-1,
+                debug=False),
+            dict(
+                assigner=dict(
+                    type='MaxIoUAssigner',
+                    pos_iou_thr=0.7,
+                    neg_iou_thr=0.7,
+                    min_pos_iou=0.7,
+                    match_low_quality=False,
+                    ignore_iof_thr=-1),
+                sampler=dict(
+                    type='RandomSampler',
+                    num=512,
+                    pos_fraction=0.25,
+                    neg_pos_ub=-1,
+                    add_gt_as_proposals=True),
+                pos_weight=-1,
+                debug=False)
+        ]),
+    test_cfg=dict(
+        rpn=dict(
+            nms_pre=1000,
+            max_per_img=1000,
+            nms=dict(type='nms', iou_threshold=0.7),
+            min_bbox_size=0),
+        rcnn=dict(
+            score_thr=0.05,
+            nms=dict(type='nms', iou_threshold=0.5),
+            max_per_img=100)))
+dataset_type = 'CocoDataset'
+data_root = '/opt/ml/detection/dataset/'
+classes = ('General trash', 'Background')
+img_norm_cfg = dict(
+    mean=[123.675, 116.28, 103.53], std=[58.395, 57.12, 57.375], to_rgb=True)
+img_scale = (1024, 1024)
+albu_train_transforms = [
+    dict(
+        type='OneOf',
+        transforms=[
+            dict(type='Flip', p=1.0),
+            dict(type='RandomRotate90', p=1.0)
+        ],
+        p=0.5),
+    dict(
+        type='RandomResizedCrop',
+        height=1024,
+        width=1024,
+        scale=(0.5, 1.0),
+        p=0.5),
+    dict(
+        type='RandomBrightnessContrast',
+        brightness_limit=0.1,
+        contrast_limit=0.15,
+        p=0.5),
+    dict(
+        type='HueSaturationValue',
+        hue_shift_limit=15,
+        sat_shift_limit=25,
+        val_shift_limit=10,
+        p=0.5),
+    dict(type='GaussNoise', p=0.3),
+    dict(
+        type='OneOf',
+        transforms=[
+            dict(type='Blur', p=1.0),
+            dict(type='GaussianBlur', p=1.0),
+            dict(type='MedianBlur', blur_limit=5, p=1.0),
+            dict(type='MotionBlur', p=1.0)
+        ],
+        p=0.1)
+]
+train_pipeline = [
+    dict(type='LoadImageFromFile'),
+    dict(type='LoadAnnotations', with_bbox=True),
+    dict(type='Resize', img_scale=(1024, 1024), keep_ratio=True),
+    dict(type='RandomFlip', flip_ratio=0.0),
+    dict(
+        type='Albu',
+        transforms=[
+            dict(
+                type='OneOf',
+                transforms=[
+                    dict(type='Flip', p=1.0),
+                    dict(type='RandomRotate90', p=1.0)
+                ],
+                p=0.5),
+            dict(
+                type='RandomResizedCrop',
+                height=1024,
+                width=1024,
+                scale=(0.5, 1.0),
+                p=0.5),
+            dict(
+                type='RandomBrightnessContrast',
+                brightness_limit=0.1,
+                contrast_limit=0.15,
+                p=0.5),
+            dict(
+                type='HueSaturationValue',
+                hue_shift_limit=15,
+                sat_shift_limit=25,
+                val_shift_limit=10,
+                p=0.5),
+            dict(type='GaussNoise', p=0.3),
+            dict(
+                type='OneOf',
+                transforms=[
+                    dict(type='Blur', p=1.0),
+                    dict(type='GaussianBlur', p=1.0),
+                    dict(type='MedianBlur', blur_limit=5, p=1.0),
+                    dict(type='MotionBlur', p=1.0)
+                ],
+                p=0.1)
+        ],
+        bbox_params=dict(
+            type='BboxParams',
+            format='pascal_voc',
+            label_fields=['gt_labels'],
+            min_visibility=0.0,
+            filter_lost_elements=True),
+        keymap=dict(img='image', gt_bboxes='bboxes'),
+        update_pad_shape=False,
+        skip_img_without_anno=True),
+    dict(
+        type='Normalize',
+        mean=[123.675, 116.28, 103.53],
+        std=[58.395, 57.12, 57.375],
+        to_rgb=True),
+    dict(type='Pad', size_divisor=32),
+    dict(type='DefaultFormatBundle'),
+    dict(type='Collect', keys=['img', 'gt_bboxes', 'gt_labels'])
+]
+val_pipeline = [
+    dict(type='LoadImageFromFile'),
+    dict(
+        type='MultiScaleFlipAug',
+        img_scale=(1024, 1024),
+        flip=False,
+        transforms=[
+            dict(type='Resize', keep_ratio=True),
+            dict(type='RandomFlip'),
+            dict(
+                type='Normalize',
+                mean=[123.675, 116.28, 103.53],
+                std=[58.395, 57.12, 57.375],
+                to_rgb=True),
+            dict(type='Pad', size_divisor=32),
+            dict(type='ImageToTensor', keys=['img']),
+            dict(type='Collect', keys=['img'])
+        ])
+]
+test_pipeline = [
+    dict(type='LoadImageFromFile'),
+    dict(
+        type='MultiScaleFlipAug',
+        img_scale=(1024, 1024),
+        flip=False,
+        transforms=[
+            dict(type='Resize', keep_ratio=True),
+            dict(type='RandomFlip'),
+            dict(
+                type='Normalize',
+                mean=[123.675, 116.28, 103.53],
+                std=[58.395, 57.12, 57.375],
+                to_rgb=True),
+            dict(type='Pad', size_divisor=32),
+            dict(type='ImageToTensor', keys=['img']),
+            dict(type='Collect', keys=['img'])
+        ])
+]
+data = dict(
+    samples_per_gpu=8,
+    workers_per_gpu=2,
+    train=dict(
+        type='CocoDataset',
+        classes=('General trash', 'Background'),
+        ann_file='/opt/ml/detection/dataset/generaltrash_train_cv_3.json',
+        img_prefix='/opt/ml/detection/dataset/',
+        pipeline=[
+            dict(type='LoadImageFromFile'),
+            dict(type='LoadAnnotations', with_bbox=True),
+            dict(type='Resize', img_scale=(1024, 1024), keep_ratio=True),
+            dict(type='RandomFlip', flip_ratio=0.0),
+            dict(
+                type='Albu',
+                transforms=[
+                    dict(
+                        type='OneOf',
+                        transforms=[
+                            dict(type='Flip', p=1.0),
+                            dict(type='RandomRotate90', p=1.0)
+                        ],
+                        p=0.5),
+                    dict(
+                        type='RandomResizedCrop',
+                        height=1024,
+                        width=1024,
+                        scale=(0.5, 1.0),
+                        p=0.5),
+                    dict(
+                        type='RandomBrightnessContrast',
+                        brightness_limit=0.1,
+                        contrast_limit=0.15,
+                        p=0.5),
+                    dict(
+                        type='HueSaturationValue',
+                        hue_shift_limit=15,
+                        sat_shift_limit=25,
+                        val_shift_limit=10,
+                        p=0.5),
+                    dict(type='GaussNoise', p=0.3),
+                    dict(
+                        type='OneOf',
+                        transforms=[
+                            dict(type='Blur', p=1.0),
+                            dict(type='GaussianBlur', p=1.0),
+                            dict(type='MedianBlur', blur_limit=5, p=1.0),
+                            dict(type='MotionBlur', p=1.0)
+                        ],
+                        p=0.1)
+                ],
+                bbox_params=dict(
+                    type='BboxParams',
+                    format='pascal_voc',
+                    label_fields=['gt_labels'],
+                    min_visibility=0.0,
+                    filter_lost_elements=True),
+                keymap=dict(img='image', gt_bboxes='bboxes'),
+                update_pad_shape=False,
+                skip_img_without_anno=True),
+            dict(
+                type='Normalize',
+                mean=[123.675, 116.28, 103.53],
+                std=[58.395, 57.12, 57.375],
+                to_rgb=True),
+            dict(type='Pad', size_divisor=32),
+            dict(type='DefaultFormatBundle'),
+            dict(type='Collect', keys=['img', 'gt_bboxes', 'gt_labels'])
+        ]),
+    val=dict(
+        type='CocoDataset',
+        classes=('General trash', 'Background'),
+        ann_file='/opt/ml/detection/dataset/generaltrash_valid_cv_3.json',
+        img_prefix='/opt/ml/detection/dataset/',
+        pipeline=[
+            dict(type='LoadImageFromFile'),
+            dict(
+                type='MultiScaleFlipAug',
+                img_scale=(1024, 1024),
+                flip=False,
+                transforms=[
+                    dict(type='Resize', keep_ratio=True),
+                    dict(type='RandomFlip'),
+                    dict(
+                        type='Normalize',
+                        mean=[123.675, 116.28, 103.53],
+                        std=[58.395, 57.12, 57.375],
+                        to_rgb=True),
+                    dict(type='Pad', size_divisor=32),
+                    dict(type='ImageToTensor', keys=['img']),
+                    dict(type='Collect', keys=['img'])
+                ])
+        ]),
+    test=dict(
+        type='CocoDataset',
+        classes=('General trash', 'Background'),
+        ann_file='/opt/ml/detection/dataset/test.json',
+        img_prefix='/opt/ml/detection/dataset/',
+        pipeline=[
+            dict(type='LoadImageFromFile'),
+            dict(
+                type='MultiScaleFlipAug',
+                img_scale=(1024, 1024),
+                flip=False,
+                transforms=[
+                    dict(type='Resize', keep_ratio=True),
+                    dict(type='RandomFlip'),
+                    dict(
+                        type='Normalize',
+                        mean=[123.675, 116.28, 103.53],
+                        std=[58.395, 57.12, 57.375],
+                        to_rgb=True),
+                    dict(type='Pad', size_divisor=32),
+                    dict(type='ImageToTensor', keys=['img']),
+                    dict(type='Collect', keys=['img'])
+                ])
+        ]))
+evaluation = dict(interval=1, metric='bbox', classwise=True)
+optimizer = dict(
+    type='AdamW',
+    lr=0.0005,
+    betas=(0.9, 0.999),
+    weight_decay=0.05,
+    paramwise_cfg=dict(
+        custom_keys=dict(
+            absolute_pos_embed=dict(decay_mult=0.0),
+            relative_position_bias_table=dict(decay_mult=0.0),
+            norm=dict(decay_mult=0.0))))
+optimizer_config = dict(grad_clip=None)
+lr_config = dict(
+    policy='CosineAnnealing',
+    warmup='linear',
+    warmup_iters=212,
+    warmup_ratio=0.001,
+    min_lr=1e-06)
+runner = dict(type='EpochBasedRunner', max_epochs=36)
+checkpoint_config = dict(max_keep_ckpts=5, interval=1)
+log_config = dict(
+    interval=50,
+    hooks=[
+        dict(type='TextLoggerHook'),
+        dict(
+            type='WandbLoggerHook',
+            interval=1000,
+            init_kwargs=dict(
+                project='two-stage-model',
+                entity='canvas11',
+                name='LEE_SingleTarget(GeneralTrash)_SwinsCascadeRCNN'))
+    ])
+custom_hooks = [dict(type='NumClassCheckHook')]
+dist_params = dict(backend='nccl')
+log_level = 'INFO'
+load_from = None
+resume_from = None
+workflow = [('train', 1)]
+opencv_num_threads = 0
+mp_start_method = 'fork'
+pretrained = 'https://github.com/SwinTransformer/storage/releases/download/v1.0.0/swin_small_patch4_window7_224.pth'
+fp16 = dict(loss_scale=512.0)
+work_dir = 'work_dirs/cascade_rcnn_swin-s_single_target'
+auto_resume = False
+gpu_ids = [0]
+
+2022-03-30 15:26:57,918 - mmdet - INFO - Set random seed to 539361345, deterministic: False
+2022-03-30 15:26:58,847 - mmdet - INFO - load checkpoint from http path: https://github.com/SwinTransformer/storage/releases/download/v1.0.0/swin_small_patch4_window7_224.pth
+2022-03-30 15:26:59,129 - mmdet - INFO - initialize FPN with init_cfg {'type': 'Xavier', 'layer': 'Conv2d', 'distribution': 'uniform'}
+2022-03-30 15:26:59,152 - mmdet - INFO - initialize RPNHead with init_cfg {'type': 'Normal', 'layer': 'Conv2d', 'std': 0.01}
+2022-03-30 15:26:59,160 - mmdet - INFO - initialize Shared2FCBBoxHead with init_cfg [{'type': 'Normal', 'std': 0.01, 'override': {'name': 'fc_cls'}}, {'type': 'Normal', 'std': 0.001, 'override': {'name': 'fc_reg'}}, {'type': 'Xavier', 'distribution': 'uniform', 'override': [{'name': 'shared_fcs'}, {'name': 'cls_fcs'}, {'name': 'reg_fcs'}]}]
+2022-03-30 15:26:59,263 - mmdet - INFO - initialize Shared2FCBBoxHead with init_cfg [{'type': 'Normal', 'std': 0.01, 'override': {'name': 'fc_cls'}}, {'type': 'Normal', 'std': 0.001, 'override': {'name': 'fc_reg'}}, {'type': 'Xavier', 'distribution': 'uniform', 'override': [{'name': 'shared_fcs'}, {'name': 'cls_fcs'}, {'name': 'reg_fcs'}]}]
+2022-03-30 15:26:59,366 - mmdet - INFO - initialize Shared2FCBBoxHead with init_cfg [{'type': 'Normal', 'std': 0.01, 'override': {'name': 'fc_cls'}}, {'type': 'Normal', 'std': 0.001, 'override': {'name': 'fc_reg'}}, {'type': 'Xavier', 'distribution': 'uniform', 'override': [{'name': 'shared_fcs'}, {'name': 'cls_fcs'}, {'name': 'reg_fcs'}]}]
+Name of parameter - Initialization information
+
+backbone.patch_embed.projection.weight - torch.Size([96, 3, 4, 4]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.patch_embed.projection.bias - torch.Size([96]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.patch_embed.norm.weight - torch.Size([96]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.patch_embed.norm.bias - torch.Size([96]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.0.blocks.0.norm1.weight - torch.Size([96]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.0.blocks.0.norm1.bias - torch.Size([96]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.0.blocks.0.attn.w_msa.relative_position_bias_table - torch.Size([169, 3]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.0.blocks.0.attn.w_msa.qkv.weight - torch.Size([288, 96]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.0.blocks.0.attn.w_msa.qkv.bias - torch.Size([288]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.0.blocks.0.attn.w_msa.proj.weight - torch.Size([96, 96]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.0.blocks.0.attn.w_msa.proj.bias - torch.Size([96]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.0.blocks.0.norm2.weight - torch.Size([96]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.0.blocks.0.norm2.bias - torch.Size([96]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.0.blocks.0.ffn.layers.0.0.weight - torch.Size([384, 96]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.0.blocks.0.ffn.layers.0.0.bias - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.0.blocks.0.ffn.layers.1.weight - torch.Size([96, 384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.0.blocks.0.ffn.layers.1.bias - torch.Size([96]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.0.blocks.1.norm1.weight - torch.Size([96]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.0.blocks.1.norm1.bias - torch.Size([96]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.0.blocks.1.attn.w_msa.relative_position_bias_table - torch.Size([169, 3]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.0.blocks.1.attn.w_msa.qkv.weight - torch.Size([288, 96]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.0.blocks.1.attn.w_msa.qkv.bias - torch.Size([288]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.0.blocks.1.attn.w_msa.proj.weight - torch.Size([96, 96]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.0.blocks.1.attn.w_msa.proj.bias - torch.Size([96]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.0.blocks.1.norm2.weight - torch.Size([96]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.0.blocks.1.norm2.bias - torch.Size([96]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.0.blocks.1.ffn.layers.0.0.weight - torch.Size([384, 96]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.0.blocks.1.ffn.layers.0.0.bias - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.0.blocks.1.ffn.layers.1.weight - torch.Size([96, 384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.0.blocks.1.ffn.layers.1.bias - torch.Size([96]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.0.downsample.norm.weight - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.0.downsample.norm.bias - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.0.downsample.reduction.weight - torch.Size([192, 384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.1.blocks.0.norm1.weight - torch.Size([192]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.1.blocks.0.norm1.bias - torch.Size([192]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.1.blocks.0.attn.w_msa.relative_position_bias_table - torch.Size([169, 6]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.1.blocks.0.attn.w_msa.qkv.weight - torch.Size([576, 192]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.1.blocks.0.attn.w_msa.qkv.bias - torch.Size([576]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.1.blocks.0.attn.w_msa.proj.weight - torch.Size([192, 192]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.1.blocks.0.attn.w_msa.proj.bias - torch.Size([192]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.1.blocks.0.norm2.weight - torch.Size([192]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.1.blocks.0.norm2.bias - torch.Size([192]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.1.blocks.0.ffn.layers.0.0.weight - torch.Size([768, 192]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.1.blocks.0.ffn.layers.0.0.bias - torch.Size([768]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.1.blocks.0.ffn.layers.1.weight - torch.Size([192, 768]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.1.blocks.0.ffn.layers.1.bias - torch.Size([192]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.1.blocks.1.norm1.weight - torch.Size([192]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.1.blocks.1.norm1.bias - torch.Size([192]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.1.blocks.1.attn.w_msa.relative_position_bias_table - torch.Size([169, 6]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.1.blocks.1.attn.w_msa.qkv.weight - torch.Size([576, 192]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.1.blocks.1.attn.w_msa.qkv.bias - torch.Size([576]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.1.blocks.1.attn.w_msa.proj.weight - torch.Size([192, 192]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.1.blocks.1.attn.w_msa.proj.bias - torch.Size([192]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.1.blocks.1.norm2.weight - torch.Size([192]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.1.blocks.1.norm2.bias - torch.Size([192]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.1.blocks.1.ffn.layers.0.0.weight - torch.Size([768, 192]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.1.blocks.1.ffn.layers.0.0.bias - torch.Size([768]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.1.blocks.1.ffn.layers.1.weight - torch.Size([192, 768]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.1.blocks.1.ffn.layers.1.bias - torch.Size([192]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.1.downsample.norm.weight - torch.Size([768]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.1.downsample.norm.bias - torch.Size([768]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.1.downsample.reduction.weight - torch.Size([384, 768]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.0.norm1.weight - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.0.norm1.bias - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.0.attn.w_msa.relative_position_bias_table - torch.Size([169, 12]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.0.attn.w_msa.qkv.weight - torch.Size([1152, 384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.0.attn.w_msa.qkv.bias - torch.Size([1152]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.0.attn.w_msa.proj.weight - torch.Size([384, 384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.0.attn.w_msa.proj.bias - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.0.norm2.weight - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.0.norm2.bias - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.0.ffn.layers.0.0.weight - torch.Size([1536, 384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.0.ffn.layers.0.0.bias - torch.Size([1536]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.0.ffn.layers.1.weight - torch.Size([384, 1536]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.0.ffn.layers.1.bias - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.1.norm1.weight - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.1.norm1.bias - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.1.attn.w_msa.relative_position_bias_table - torch.Size([169, 12]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.1.attn.w_msa.qkv.weight - torch.Size([1152, 384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.1.attn.w_msa.qkv.bias - torch.Size([1152]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.1.attn.w_msa.proj.weight - torch.Size([384, 384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.1.attn.w_msa.proj.bias - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.1.norm2.weight - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.1.norm2.bias - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.1.ffn.layers.0.0.weight - torch.Size([1536, 384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.1.ffn.layers.0.0.bias - torch.Size([1536]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.1.ffn.layers.1.weight - torch.Size([384, 1536]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.1.ffn.layers.1.bias - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.2.norm1.weight - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.2.norm1.bias - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.2.attn.w_msa.relative_position_bias_table - torch.Size([169, 12]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.2.attn.w_msa.qkv.weight - torch.Size([1152, 384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.2.attn.w_msa.qkv.bias - torch.Size([1152]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.2.attn.w_msa.proj.weight - torch.Size([384, 384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.2.attn.w_msa.proj.bias - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.2.norm2.weight - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.2.norm2.bias - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.2.ffn.layers.0.0.weight - torch.Size([1536, 384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.2.ffn.layers.0.0.bias - torch.Size([1536]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.2.ffn.layers.1.weight - torch.Size([384, 1536]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.2.ffn.layers.1.bias - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.3.norm1.weight - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.3.norm1.bias - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.3.attn.w_msa.relative_position_bias_table - torch.Size([169, 12]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.3.attn.w_msa.qkv.weight - torch.Size([1152, 384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.3.attn.w_msa.qkv.bias - torch.Size([1152]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.3.attn.w_msa.proj.weight - torch.Size([384, 384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.3.attn.w_msa.proj.bias - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.3.norm2.weight - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.3.norm2.bias - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.3.ffn.layers.0.0.weight - torch.Size([1536, 384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.3.ffn.layers.0.0.bias - torch.Size([1536]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.3.ffn.layers.1.weight - torch.Size([384, 1536]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.3.ffn.layers.1.bias - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.4.norm1.weight - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.4.norm1.bias - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.4.attn.w_msa.relative_position_bias_table - torch.Size([169, 12]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.4.attn.w_msa.qkv.weight - torch.Size([1152, 384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.4.attn.w_msa.qkv.bias - torch.Size([1152]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.4.attn.w_msa.proj.weight - torch.Size([384, 384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.4.attn.w_msa.proj.bias - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.4.norm2.weight - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.4.norm2.bias - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.4.ffn.layers.0.0.weight - torch.Size([1536, 384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.4.ffn.layers.0.0.bias - torch.Size([1536]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.4.ffn.layers.1.weight - torch.Size([384, 1536]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.4.ffn.layers.1.bias - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.5.norm1.weight - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.5.norm1.bias - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.5.attn.w_msa.relative_position_bias_table - torch.Size([169, 12]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.5.attn.w_msa.qkv.weight - torch.Size([1152, 384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.5.attn.w_msa.qkv.bias - torch.Size([1152]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.5.attn.w_msa.proj.weight - torch.Size([384, 384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.5.attn.w_msa.proj.bias - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.5.norm2.weight - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.5.norm2.bias - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.5.ffn.layers.0.0.weight - torch.Size([1536, 384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.5.ffn.layers.0.0.bias - torch.Size([1536]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.5.ffn.layers.1.weight - torch.Size([384, 1536]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.5.ffn.layers.1.bias - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.6.norm1.weight - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.6.norm1.bias - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.6.attn.w_msa.relative_position_bias_table - torch.Size([169, 12]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.6.attn.w_msa.qkv.weight - torch.Size([1152, 384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.6.attn.w_msa.qkv.bias - torch.Size([1152]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.6.attn.w_msa.proj.weight - torch.Size([384, 384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.6.attn.w_msa.proj.bias - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.6.norm2.weight - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.6.norm2.bias - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.6.ffn.layers.0.0.weight - torch.Size([1536, 384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.6.ffn.layers.0.0.bias - torch.Size([1536]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.6.ffn.layers.1.weight - torch.Size([384, 1536]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.6.ffn.layers.1.bias - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.7.norm1.weight - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.7.norm1.bias - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.7.attn.w_msa.relative_position_bias_table - torch.Size([169, 12]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.7.attn.w_msa.qkv.weight - torch.Size([1152, 384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.7.attn.w_msa.qkv.bias - torch.Size([1152]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.7.attn.w_msa.proj.weight - torch.Size([384, 384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.7.attn.w_msa.proj.bias - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.7.norm2.weight - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.7.norm2.bias - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.7.ffn.layers.0.0.weight - torch.Size([1536, 384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.7.ffn.layers.0.0.bias - torch.Size([1536]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.7.ffn.layers.1.weight - torch.Size([384, 1536]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.7.ffn.layers.1.bias - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.8.norm1.weight - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.8.norm1.bias - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.8.attn.w_msa.relative_position_bias_table - torch.Size([169, 12]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.8.attn.w_msa.qkv.weight - torch.Size([1152, 384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.8.attn.w_msa.qkv.bias - torch.Size([1152]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.8.attn.w_msa.proj.weight - torch.Size([384, 384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.8.attn.w_msa.proj.bias - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.8.norm2.weight - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.8.norm2.bias - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.8.ffn.layers.0.0.weight - torch.Size([1536, 384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.8.ffn.layers.0.0.bias - torch.Size([1536]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.8.ffn.layers.1.weight - torch.Size([384, 1536]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.8.ffn.layers.1.bias - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.9.norm1.weight - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.9.norm1.bias - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.9.attn.w_msa.relative_position_bias_table - torch.Size([169, 12]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.9.attn.w_msa.qkv.weight - torch.Size([1152, 384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.9.attn.w_msa.qkv.bias - torch.Size([1152]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.9.attn.w_msa.proj.weight - torch.Size([384, 384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.9.attn.w_msa.proj.bias - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.9.norm2.weight - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.9.norm2.bias - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.9.ffn.layers.0.0.weight - torch.Size([1536, 384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.9.ffn.layers.0.0.bias - torch.Size([1536]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.9.ffn.layers.1.weight - torch.Size([384, 1536]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.9.ffn.layers.1.bias - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.10.norm1.weight - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.10.norm1.bias - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.10.attn.w_msa.relative_position_bias_table - torch.Size([169, 12]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.10.attn.w_msa.qkv.weight - torch.Size([1152, 384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.10.attn.w_msa.qkv.bias - torch.Size([1152]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.10.attn.w_msa.proj.weight - torch.Size([384, 384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.10.attn.w_msa.proj.bias - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.10.norm2.weight - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.10.norm2.bias - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.10.ffn.layers.0.0.weight - torch.Size([1536, 384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.10.ffn.layers.0.0.bias - torch.Size([1536]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.10.ffn.layers.1.weight - torch.Size([384, 1536]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.10.ffn.layers.1.bias - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.11.norm1.weight - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.11.norm1.bias - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.11.attn.w_msa.relative_position_bias_table - torch.Size([169, 12]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.11.attn.w_msa.qkv.weight - torch.Size([1152, 384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.11.attn.w_msa.qkv.bias - torch.Size([1152]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.11.attn.w_msa.proj.weight - torch.Size([384, 384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.11.attn.w_msa.proj.bias - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.11.norm2.weight - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.11.norm2.bias - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.11.ffn.layers.0.0.weight - torch.Size([1536, 384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.11.ffn.layers.0.0.bias - torch.Size([1536]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.11.ffn.layers.1.weight - torch.Size([384, 1536]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.11.ffn.layers.1.bias - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.12.norm1.weight - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.12.norm1.bias - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.12.attn.w_msa.relative_position_bias_table - torch.Size([169, 12]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.12.attn.w_msa.qkv.weight - torch.Size([1152, 384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.12.attn.w_msa.qkv.bias - torch.Size([1152]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.12.attn.w_msa.proj.weight - torch.Size([384, 384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.12.attn.w_msa.proj.bias - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.12.norm2.weight - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.12.norm2.bias - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.12.ffn.layers.0.0.weight - torch.Size([1536, 384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.12.ffn.layers.0.0.bias - torch.Size([1536]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.12.ffn.layers.1.weight - torch.Size([384, 1536]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.12.ffn.layers.1.bias - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.13.norm1.weight - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.13.norm1.bias - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.13.attn.w_msa.relative_position_bias_table - torch.Size([169, 12]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.13.attn.w_msa.qkv.weight - torch.Size([1152, 384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.13.attn.w_msa.qkv.bias - torch.Size([1152]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.13.attn.w_msa.proj.weight - torch.Size([384, 384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.13.attn.w_msa.proj.bias - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.13.norm2.weight - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.13.norm2.bias - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.13.ffn.layers.0.0.weight - torch.Size([1536, 384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.13.ffn.layers.0.0.bias - torch.Size([1536]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.13.ffn.layers.1.weight - torch.Size([384, 1536]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.13.ffn.layers.1.bias - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.14.norm1.weight - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.14.norm1.bias - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.14.attn.w_msa.relative_position_bias_table - torch.Size([169, 12]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.14.attn.w_msa.qkv.weight - torch.Size([1152, 384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.14.attn.w_msa.qkv.bias - torch.Size([1152]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.14.attn.w_msa.proj.weight - torch.Size([384, 384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.14.attn.w_msa.proj.bias - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.14.norm2.weight - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.14.norm2.bias - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.14.ffn.layers.0.0.weight - torch.Size([1536, 384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.14.ffn.layers.0.0.bias - torch.Size([1536]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.14.ffn.layers.1.weight - torch.Size([384, 1536]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.14.ffn.layers.1.bias - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.15.norm1.weight - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.15.norm1.bias - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.15.attn.w_msa.relative_position_bias_table - torch.Size([169, 12]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.15.attn.w_msa.qkv.weight - torch.Size([1152, 384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.15.attn.w_msa.qkv.bias - torch.Size([1152]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.15.attn.w_msa.proj.weight - torch.Size([384, 384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.15.attn.w_msa.proj.bias - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.15.norm2.weight - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.15.norm2.bias - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.15.ffn.layers.0.0.weight - torch.Size([1536, 384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.15.ffn.layers.0.0.bias - torch.Size([1536]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.15.ffn.layers.1.weight - torch.Size([384, 1536]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.15.ffn.layers.1.bias - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.16.norm1.weight - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.16.norm1.bias - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.16.attn.w_msa.relative_position_bias_table - torch.Size([169, 12]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.16.attn.w_msa.qkv.weight - torch.Size([1152, 384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.16.attn.w_msa.qkv.bias - torch.Size([1152]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.16.attn.w_msa.proj.weight - torch.Size([384, 384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.16.attn.w_msa.proj.bias - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.16.norm2.weight - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.16.norm2.bias - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.16.ffn.layers.0.0.weight - torch.Size([1536, 384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.16.ffn.layers.0.0.bias - torch.Size([1536]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.16.ffn.layers.1.weight - torch.Size([384, 1536]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.16.ffn.layers.1.bias - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.17.norm1.weight - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.17.norm1.bias - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.17.attn.w_msa.relative_position_bias_table - torch.Size([169, 12]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.17.attn.w_msa.qkv.weight - torch.Size([1152, 384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.17.attn.w_msa.qkv.bias - torch.Size([1152]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.17.attn.w_msa.proj.weight - torch.Size([384, 384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.17.attn.w_msa.proj.bias - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.17.norm2.weight - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.17.norm2.bias - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.17.ffn.layers.0.0.weight - torch.Size([1536, 384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.17.ffn.layers.0.0.bias - torch.Size([1536]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.17.ffn.layers.1.weight - torch.Size([384, 1536]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.blocks.17.ffn.layers.1.bias - torch.Size([384]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.downsample.norm.weight - torch.Size([1536]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.downsample.norm.bias - torch.Size([1536]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.2.downsample.reduction.weight - torch.Size([768, 1536]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.3.blocks.0.norm1.weight - torch.Size([768]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.3.blocks.0.norm1.bias - torch.Size([768]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.3.blocks.0.attn.w_msa.relative_position_bias_table - torch.Size([169, 24]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.3.blocks.0.attn.w_msa.qkv.weight - torch.Size([2304, 768]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.3.blocks.0.attn.w_msa.qkv.bias - torch.Size([2304]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.3.blocks.0.attn.w_msa.proj.weight - torch.Size([768, 768]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.3.blocks.0.attn.w_msa.proj.bias - torch.Size([768]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.3.blocks.0.norm2.weight - torch.Size([768]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.3.blocks.0.norm2.bias - torch.Size([768]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.3.blocks.0.ffn.layers.0.0.weight - torch.Size([3072, 768]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.3.blocks.0.ffn.layers.0.0.bias - torch.Size([3072]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.3.blocks.0.ffn.layers.1.weight - torch.Size([768, 3072]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.3.blocks.0.ffn.layers.1.bias - torch.Size([768]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.3.blocks.1.norm1.weight - torch.Size([768]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.3.blocks.1.norm1.bias - torch.Size([768]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.3.blocks.1.attn.w_msa.relative_position_bias_table - torch.Size([169, 24]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.3.blocks.1.attn.w_msa.qkv.weight - torch.Size([2304, 768]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.3.blocks.1.attn.w_msa.qkv.bias - torch.Size([2304]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.3.blocks.1.attn.w_msa.proj.weight - torch.Size([768, 768]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.3.blocks.1.attn.w_msa.proj.bias - torch.Size([768]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.3.blocks.1.norm2.weight - torch.Size([768]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.3.blocks.1.norm2.bias - torch.Size([768]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.3.blocks.1.ffn.layers.0.0.weight - torch.Size([3072, 768]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.3.blocks.1.ffn.layers.0.0.bias - torch.Size([3072]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.3.blocks.1.ffn.layers.1.weight - torch.Size([768, 3072]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.stages.3.blocks.1.ffn.layers.1.bias - torch.Size([768]): 
+Initialized by user-defined `init_weights` in SwinTransformer  
+
+backbone.norm0.weight - torch.Size([96]): 
+The value is the same before and after calling `init_weights` of CascadeRCNN  
+
+backbone.norm0.bias - torch.Size([96]): 
+The value is the same before and after calling `init_weights` of CascadeRCNN  
+
+backbone.norm1.weight - torch.Size([192]): 
+The value is the same before and after calling `init_weights` of CascadeRCNN  
+
+backbone.norm1.bias - torch.Size([192]): 
+The value is the same before and after calling `init_weights` of CascadeRCNN  
+
+backbone.norm2.weight - torch.Size([384]): 
+The value is the same before and after calling `init_weights` of CascadeRCNN  
+
+backbone.norm2.bias - torch.Size([384]): 
+The value is the same before and after calling `init_weights` of CascadeRCNN  
+
+backbone.norm3.weight - torch.Size([768]): 
+The value is the same before and after calling `init_weights` of CascadeRCNN  
+
+backbone.norm3.bias - torch.Size([768]): 
+The value is the same before and after calling `init_weights` of CascadeRCNN  
+
+neck.lateral_convs.0.conv.weight - torch.Size([256, 96, 1, 1]): 
+XavierInit: gain=1, distribution=uniform, bias=0 
+
+neck.lateral_convs.0.conv.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of CascadeRCNN  
+
+neck.lateral_convs.1.conv.weight - torch.Size([256, 192, 1, 1]): 
+XavierInit: gain=1, distribution=uniform, bias=0 
+
+neck.lateral_convs.1.conv.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of CascadeRCNN  
+
+neck.lateral_convs.2.conv.weight - torch.Size([256, 384, 1, 1]): 
+XavierInit: gain=1, distribution=uniform, bias=0 
+
+neck.lateral_convs.2.conv.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of CascadeRCNN  
+
+neck.lateral_convs.3.conv.weight - torch.Size([256, 768, 1, 1]): 
+XavierInit: gain=1, distribution=uniform, bias=0 
+
+neck.lateral_convs.3.conv.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of CascadeRCNN  
+
+neck.fpn_convs.0.conv.weight - torch.Size([256, 256, 3, 3]): 
+XavierInit: gain=1, distribution=uniform, bias=0 
+
+neck.fpn_convs.0.conv.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of CascadeRCNN  
+
+neck.fpn_convs.1.conv.weight - torch.Size([256, 256, 3, 3]): 
+XavierInit: gain=1, distribution=uniform, bias=0 
+
+neck.fpn_convs.1.conv.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of CascadeRCNN  
+
+neck.fpn_convs.2.conv.weight - torch.Size([256, 256, 3, 3]): 
+XavierInit: gain=1, distribution=uniform, bias=0 
+
+neck.fpn_convs.2.conv.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of CascadeRCNN  
+
+neck.fpn_convs.3.conv.weight - torch.Size([256, 256, 3, 3]): 
+XavierInit: gain=1, distribution=uniform, bias=0 
+
+neck.fpn_convs.3.conv.bias - torch.Size([256]): 
+The value is the same before and after calling `init_weights` of CascadeRCNN  
+
+rpn_head.rpn_conv.weight - torch.Size([256, 256, 3, 3]): 
+NormalInit: mean=0, std=0.01, bias=0 
+
+rpn_head.rpn_conv.bias - torch.Size([256]): 
+NormalInit: mean=0, std=0.01, bias=0 
+
+rpn_head.rpn_cls.weight - torch.Size([3, 256, 1, 1]): 
+NormalInit: mean=0, std=0.01, bias=0 
+
+rpn_head.rpn_cls.bias - torch.Size([3]): 
+NormalInit: mean=0, std=0.01, bias=0 
+
+rpn_head.rpn_reg.weight - torch.Size([12, 256, 1, 1]): 
+NormalInit: mean=0, std=0.01, bias=0 
+
+rpn_head.rpn_reg.bias - torch.Size([12]): 
+NormalInit: mean=0, std=0.01, bias=0 
+
+roi_head.bbox_head.0.fc_cls.weight - torch.Size([3, 1024]): 
+NormalInit: mean=0, std=0.01, bias=0 
+
+roi_head.bbox_head.0.fc_cls.bias - torch.Size([3]): 
+NormalInit: mean=0, std=0.01, bias=0 
+
+roi_head.bbox_head.0.fc_reg.weight - torch.Size([4, 1024]): 
+NormalInit: mean=0, std=0.001, bias=0 
+
+roi_head.bbox_head.0.fc_reg.bias - torch.Size([4]): 
+NormalInit: mean=0, std=0.001, bias=0 
+
+roi_head.bbox_head.0.shared_fcs.0.weight - torch.Size([1024, 12544]): 
+XavierInit: gain=1, distribution=uniform, bias=0 
+
+roi_head.bbox_head.0.shared_fcs.0.bias - torch.Size([1024]): 
+XavierInit: gain=1, distribution=uniform, bias=0 
+
+roi_head.bbox_head.0.shared_fcs.1.weight - torch.Size([1024, 1024]): 
+XavierInit: gain=1, distribution=uniform, bias=0 
+
+roi_head.bbox_head.0.shared_fcs.1.bias - torch.Size([1024]): 
+XavierInit: gain=1, distribution=uniform, bias=0 
+
+roi_head.bbox_head.1.fc_cls.weight - torch.Size([3, 1024]): 
+NormalInit: mean=0, std=0.01, bias=0 
+
+roi_head.bbox_head.1.fc_cls.bias - torch.Size([3]): 
+NormalInit: mean=0, std=0.01, bias=0 
+
+roi_head.bbox_head.1.fc_reg.weight - torch.Size([4, 1024]): 
+NormalInit: mean=0, std=0.001, bias=0 
+
+roi_head.bbox_head.1.fc_reg.bias - torch.Size([4]): 
+NormalInit: mean=0, std=0.001, bias=0 
+
+roi_head.bbox_head.1.shared_fcs.0.weight - torch.Size([1024, 12544]): 
+XavierInit: gain=1, distribution=uniform, bias=0 
+
+roi_head.bbox_head.1.shared_fcs.0.bias - torch.Size([1024]): 
+XavierInit: gain=1, distribution=uniform, bias=0 
+
+roi_head.bbox_head.1.shared_fcs.1.weight - torch.Size([1024, 1024]): 
+XavierInit: gain=1, distribution=uniform, bias=0 
+
+roi_head.bbox_head.1.shared_fcs.1.bias - torch.Size([1024]): 
+XavierInit: gain=1, distribution=uniform, bias=0 
+
+roi_head.bbox_head.2.fc_cls.weight - torch.Size([3, 1024]): 
+NormalInit: mean=0, std=0.01, bias=0 
+
+roi_head.bbox_head.2.fc_cls.bias - torch.Size([3]): 
+NormalInit: mean=0, std=0.01, bias=0 
+
+roi_head.bbox_head.2.fc_reg.weight - torch.Size([4, 1024]): 
+NormalInit: mean=0, std=0.001, bias=0 
+
+roi_head.bbox_head.2.fc_reg.bias - torch.Size([4]): 
+NormalInit: mean=0, std=0.001, bias=0 
+
+roi_head.bbox_head.2.shared_fcs.0.weight - torch.Size([1024, 12544]): 
+XavierInit: gain=1, distribution=uniform, bias=0 
+
+roi_head.bbox_head.2.shared_fcs.0.bias - torch.Size([1024]): 
+XavierInit: gain=1, distribution=uniform, bias=0 
+
+roi_head.bbox_head.2.shared_fcs.1.weight - torch.Size([1024, 1024]): 
+XavierInit: gain=1, distribution=uniform, bias=0 
+
+roi_head.bbox_head.2.shared_fcs.1.bias - torch.Size([1024]): 
+XavierInit: gain=1, distribution=uniform, bias=0 
+2022-03-30 15:27:03,713 - mmdet - INFO - Start running, host: root@0a25b60abdd2, work_dir: /opt/ml/detection/SEUNGHYUN_WORKSPACE/my_mmdetection/work_dirs/cascade_rcnn_swin-s_single_target
+2022-03-30 15:27:03,713 - mmdet - INFO - Hooks will be executed in the following order:
+before_run:
+(VERY_HIGH   ) CosineAnnealingLrUpdaterHook       
+(ABOVE_NORMAL) Fp16OptimizerHook                  
+(NORMAL      ) CheckpointHook                     
+(LOW         ) EvalHook                           
+(VERY_LOW    ) TextLoggerHook                     
+(VERY_LOW    ) WandbLoggerHook                    
+ -------------------- 
+before_train_epoch:
+(VERY_HIGH   ) CosineAnnealingLrUpdaterHook       
+(NORMAL      ) NumClassCheckHook                  
+(LOW         ) IterTimerHook                      
+(LOW         ) EvalHook                           
+(VERY_LOW    ) TextLoggerHook                     
+(VERY_LOW    ) WandbLoggerHook                    
+ -------------------- 
+before_train_iter:
+(VERY_HIGH   ) CosineAnnealingLrUpdaterHook       
+(LOW         ) IterTimerHook                      
+(LOW         ) EvalHook                           
+ -------------------- 
+after_train_iter:
+(ABOVE_NORMAL) Fp16OptimizerHook                  
+(NORMAL      ) CheckpointHook                     
+(LOW         ) IterTimerHook                      
+(LOW         ) EvalHook                           
+(VERY_LOW    ) TextLoggerHook                     
+(VERY_LOW    ) WandbLoggerHook                    
+ -------------------- 
+after_train_epoch:
+(NORMAL      ) CheckpointHook                     
+(LOW         ) EvalHook                           
+(VERY_LOW    ) TextLoggerHook                     
+(VERY_LOW    ) WandbLoggerHook                    
+ -------------------- 
+before_val_epoch:
+(NORMAL      ) NumClassCheckHook                  
+(LOW         ) IterTimerHook                      
+(VERY_LOW    ) TextLoggerHook                     
+(VERY_LOW    ) WandbLoggerHook                    
+ -------------------- 
+before_val_iter:
+(LOW         ) IterTimerHook                      
+ -------------------- 
+after_val_iter:
+(LOW         ) IterTimerHook                      
+ -------------------- 
+after_val_epoch:
+(VERY_LOW    ) TextLoggerHook                     
+(VERY_LOW    ) WandbLoggerHook                    
+ -------------------- 
+after_run:
+(VERY_LOW    ) TextLoggerHook                     
+(VERY_LOW    ) WandbLoggerHook                    
+ -------------------- 
+2022-03-30 15:27:03,713 - mmdet - INFO - workflow: [('train', 1)], max: 36 epochs
+2022-03-30 15:27:03,716 - mmdet - INFO - Checkpoints will be saved to /opt/ml/detection/SEUNGHYUN_WORKSPACE/my_mmdetection/work_dirs/cascade_rcnn_swin-s_single_target by HardDiskBackend.
+2022-03-30 15:28:32,967 - mmdet - INFO - Epoch [1][50/212]	lr: 1.160e-04, eta: 3:27:42, time: 1.644, data_time: 0.081, memory: 28892, loss_rpn_cls: 0.3011, loss_rpn_bbox: 0.0229, s0.loss_cls: 0.2912, s0.acc: 88.1450, s0.loss_bbox: 0.0400, s1.loss_cls: 0.1058, s1.acc: 92.7798, s1.loss_bbox: 0.0112, s2.loss_cls: 0.0484, s2.acc: 93.2993, s2.loss_bbox: 0.0019, loss: 0.8224
+2022-03-30 15:29:51,838 - mmdet - INFO - Epoch [1][100/212]	lr: 2.338e-04, eta: 3:22:10, time: 1.577, data_time: 0.020, memory: 28892, loss_rpn_cls: 0.0609, loss_rpn_bbox: 0.0231, s0.loss_cls: 0.1036, s0.acc: 97.5273, s0.loss_bbox: 0.0591, s1.loss_cls: 0.0282, s1.acc: 98.8901, s1.loss_bbox: 0.0175, s2.loss_cls: 0.0084, s2.acc: 99.4414, s2.loss_bbox: 0.0023, loss: 0.3032
+2022-03-30 15:31:11,447 - mmdet - INFO - Epoch [1][150/212]	lr: 3.516e-04, eta: 3:20:04, time: 1.592, data_time: 0.020, memory: 28892, loss_rpn_cls: 0.0564, loss_rpn_bbox: 0.0202, s0.loss_cls: 0.1050, s0.acc: 97.4131, s0.loss_bbox: 0.0580, s1.loss_cls: 0.0345, s1.acc: 98.4604, s1.loss_bbox: 0.0263, s2.loss_cls: 0.0101, s2.acc: 99.2036, s2.loss_bbox: 0.0055, loss: 0.3161
+2022-03-30 15:32:30,907 - mmdet - INFO - Epoch [1][200/212]	lr: 4.694e-04, eta: 3:18:15, time: 1.589, data_time: 0.021, memory: 28892, loss_rpn_cls: 0.0674, loss_rpn_bbox: 0.0265, s0.loss_cls: 0.1127, s0.acc: 97.1792, s0.loss_bbox: 0.0582, s1.loss_cls: 0.0413, s1.acc: 98.0103, s1.loss_bbox: 0.0327, s2.loss_cls: 0.0147, s2.acc: 98.7080, s2.loss_bbox: 0.0099, loss: 0.3634
+2022-03-30 15:32:50,088 - mmdet - INFO - Saving checkpoint at 1 epochs
+2022-03-30 15:33:34,488 - mmdet - INFO - Evaluating bbox...
+2022-03-30 15:33:35,124 - mmdet - INFO - 
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.029
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=1000 ] = 0.076
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=1000 ] = 0.024
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.013
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.046
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.130
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=300 ] = 0.130
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=1000 ] = 0.130
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.000
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.116
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.142
+
+2022-03-30 15:33:35,125 - mmdet - INFO - 
++---------------+-------+
+| category      | AP    |
++---------------+-------+
+| General trash | 0.029 |
++---------------+-------+
+2022-03-30 15:33:35,134 - mmdet - INFO - Exp name: cascade_rcnn_swin-s_single_target.py
+2022-03-30 15:33:35,134 - mmdet - INFO - Epoch(val) [1][412]	bbox_mAP: 0.0290, bbox_mAP_50: 0.0760, bbox_mAP_75: 0.0240, bbox_mAP_s: 0.0000, bbox_mAP_m: 0.0130, bbox_mAP_l: 0.0460, bbox_mAP_copypaste: 0.029 0.076 0.024 0.000 0.013 0.046
+2022-03-30 15:34:58,296 - mmdet - INFO - Epoch [2][50/212]	lr: 4.991e-04, eta: 3:09:03, time: 1.663, data_time: 0.085, memory: 28892, loss_rpn_cls: 0.0621, loss_rpn_bbox: 0.0207, s0.loss_cls: 0.1090, s0.acc: 97.2295, s0.loss_bbox: 0.0562, s1.loss_cls: 0.0403, s1.acc: 97.9932, s1.loss_bbox: 0.0312, s2.loss_cls: 0.0138, s2.acc: 98.7295, s2.loss_bbox: 0.0096, loss: 0.3429
+2022-03-30 15:36:18,275 - mmdet - INFO - Epoch [2][100/212]	lr: 4.991e-04, eta: 3:08:57, time: 1.600, data_time: 0.022, memory: 28892, loss_rpn_cls: 0.0565, loss_rpn_bbox: 0.0225, s0.loss_cls: 0.1120, s0.acc: 97.0366, s0.loss_bbox: 0.0588, s1.loss_cls: 0.0450, s1.acc: 97.6772, s1.loss_bbox: 0.0370, s2.loss_cls: 0.0161, s2.acc: 98.3477, s2.loss_bbox: 0.0129, loss: 0.3608
+2022-03-30 15:37:38,643 - mmdet - INFO - Epoch [2][150/212]	lr: 4.991e-04, eta: 3:08:38, time: 1.607, data_time: 0.022, memory: 28892, loss_rpn_cls: 0.0597, loss_rpn_bbox: 0.0249, s0.loss_cls: 0.1067, s0.acc: 97.1582, s0.loss_bbox: 0.0549, s1.loss_cls: 0.0427, s1.acc: 97.7324, s1.loss_bbox: 0.0347, s2.loss_cls: 0.0156, s2.acc: 98.4395, s2.loss_bbox: 0.0121, loss: 0.3514
+2022-03-30 15:38:58,119 - mmdet - INFO - Epoch [2][200/212]	lr: 4.991e-04, eta: 3:07:49, time: 1.589, data_time: 0.022, memory: 28892, loss_rpn_cls: 0.0645, loss_rpn_bbox: 0.0278, s0.loss_cls: 0.1175, s0.acc: 96.9434, s0.loss_bbox: 0.0607, s1.loss_cls: 0.0455, s1.acc: 97.5840, s1.loss_bbox: 0.0370, s2.loss_cls: 0.0171, s2.acc: 98.2529, s2.loss_bbox: 0.0135, loss: 0.3836
+2022-03-30 15:39:17,065 - mmdet - INFO - Saving checkpoint at 2 epochs
+2022-03-30 15:40:02,149 - mmdet - INFO - Evaluating bbox...
+2022-03-30 15:40:03,074 - mmdet - INFO - 
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.066
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=1000 ] = 0.146
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=1000 ] = 0.050
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.009
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.015
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.091
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.195
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=300 ] = 0.195
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=1000 ] = 0.195
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.028
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.099
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.248
+
+2022-03-30 15:40:03,074 - mmdet - INFO - 
++---------------+-------+
+| category      | AP    |
++---------------+-------+
+| General trash | 0.066 |
++---------------+-------+
+2022-03-30 15:40:03,083 - mmdet - INFO - Exp name: cascade_rcnn_swin-s_single_target.py
+2022-03-30 15:40:03,083 - mmdet - INFO - Epoch(val) [2][412]	bbox_mAP: 0.0660, bbox_mAP_50: 0.1460, bbox_mAP_75: 0.0500, bbox_mAP_s: 0.0090, bbox_mAP_m: 0.0150, bbox_mAP_l: 0.0910, bbox_mAP_copypaste: 0.066 0.146 0.050 0.009 0.015 0.091
+2022-03-30 15:41:26,654 - mmdet - INFO - Epoch [3][50/212]	lr: 4.962e-04, eta: 3:02:52, time: 1.671, data_time: 0.082, memory: 28892, loss_rpn_cls: 0.0534, loss_rpn_bbox: 0.0209, s0.loss_cls: 0.1067, s0.acc: 96.9800, s0.loss_bbox: 0.0562, s1.loss_cls: 0.0439, s1.acc: 97.4526, s1.loss_bbox: 0.0397, s2.loss_cls: 0.0174, s2.acc: 97.8809, s2.loss_bbox: 0.0180, loss: 0.3563
+2022-03-30 15:42:46,929 - mmdet - INFO - Epoch [3][100/212]	lr: 4.962e-04, eta: 3:02:25, time: 1.605, data_time: 0.021, memory: 28892, loss_rpn_cls: 0.0588, loss_rpn_bbox: 0.0227, s0.loss_cls: 0.1141, s0.acc: 96.9028, s0.loss_bbox: 0.0596, s1.loss_cls: 0.0457, s1.acc: 97.5186, s1.loss_bbox: 0.0387, s2.loss_cls: 0.0168, s2.acc: 98.1670, s2.loss_bbox: 0.0146, loss: 0.3709
+2022-03-30 15:44:06,371 - mmdet - INFO - Epoch [3][150/212]	lr: 4.962e-04, eta: 3:01:38, time: 1.589, data_time: 0.021, memory: 28892, loss_rpn_cls: 0.0600, loss_rpn_bbox: 0.0215, s0.loss_cls: 0.1200, s0.acc: 96.5977, s0.loss_bbox: 0.0632, s1.loss_cls: 0.0514, s1.acc: 96.9487, s1.loss_bbox: 0.0459, s2.loss_cls: 0.0201, s2.acc: 97.6597, s2.loss_bbox: 0.0187, loss: 0.4006
+2022-03-30 15:45:26,204 - mmdet - INFO - Epoch [3][200/212]	lr: 4.962e-04, eta: 3:00:50, time: 1.597, data_time: 0.022, memory: 28892, loss_rpn_cls: 0.0523, loss_rpn_bbox: 0.0205, s0.loss_cls: 0.1212, s0.acc: 96.7168, s0.loss_bbox: 0.0629, s1.loss_cls: 0.0484, s1.acc: 97.3745, s1.loss_bbox: 0.0406, s2.loss_cls: 0.0182, s2.acc: 98.0454, s2.loss_bbox: 0.0164, loss: 0.3805
+2022-03-30 15:45:45,274 - mmdet - INFO - Saving checkpoint at 3 epochs
+2022-03-30 15:46:29,020 - mmdet - INFO - Evaluating bbox...
+2022-03-30 15:46:29,748 - mmdet - INFO - 
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.092
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=1000 ] = 0.173
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=1000 ] = 0.093
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.007
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.028
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.126
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.246
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=300 ] = 0.246
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=1000 ] = 0.246
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.100
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.165
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.291
+
+2022-03-30 15:46:29,748 - mmdet - INFO - 
++---------------+-------+
+| category      | AP    |
++---------------+-------+
+| General trash | 0.092 |
++---------------+-------+
+2022-03-30 15:46:29,758 - mmdet - INFO - Exp name: cascade_rcnn_swin-s_single_target.py
+2022-03-30 15:46:29,758 - mmdet - INFO - Epoch(val) [3][412]	bbox_mAP: 0.0920, bbox_mAP_50: 0.1730, bbox_mAP_75: 0.0930, bbox_mAP_s: 0.0070, bbox_mAP_m: 0.0280, bbox_mAP_l: 0.1260, bbox_mAP_copypaste: 0.092 0.173 0.093 0.007 0.028 0.126
+2022-03-30 15:47:54,481 - mmdet - INFO - Epoch [4][50/212]	lr: 4.915e-04, eta: 2:57:20, time: 1.694, data_time: 0.082, memory: 28892, loss_rpn_cls: 0.0476, loss_rpn_bbox: 0.0182, s0.loss_cls: 0.1219, s0.acc: 96.4888, s0.loss_bbox: 0.0646, s1.loss_cls: 0.0496, s1.acc: 97.0645, s1.loss_bbox: 0.0437, s2.loss_cls: 0.0186, s2.acc: 97.7451, s2.loss_bbox: 0.0180, loss: 0.3821
+2022-03-30 15:49:14,218 - mmdet - INFO - Epoch [4][100/212]	lr: 4.915e-04, eta: 2:56:33, time: 1.595, data_time: 0.021, memory: 28892, loss_rpn_cls: 0.0490, loss_rpn_bbox: 0.0196, s0.loss_cls: 0.1156, s0.acc: 96.6758, s0.loss_bbox: 0.0594, s1.loss_cls: 0.0493, s1.acc: 97.0376, s1.loss_bbox: 0.0438, s2.loss_cls: 0.0194, s2.acc: 97.6699, s2.loss_bbox: 0.0192, loss: 0.3752
+2022-03-30 15:50:34,189 - mmdet - INFO - Epoch [4][150/212]	lr: 4.915e-04, eta: 2:55:43, time: 1.599, data_time: 0.022, memory: 28892, loss_rpn_cls: 0.0509, loss_rpn_bbox: 0.0201, s0.loss_cls: 0.1186, s0.acc: 96.5479, s0.loss_bbox: 0.0594, s1.loss_cls: 0.0511, s1.acc: 96.9805, s1.loss_bbox: 0.0450, s2.loss_cls: 0.0206, s2.acc: 97.5259, s2.loss_bbox: 0.0194, loss: 0.3850
+2022-03-30 15:51:53,661 - mmdet - INFO - Epoch [4][200/212]	lr: 4.915e-04, eta: 2:54:46, time: 1.589, data_time: 0.022, memory: 28892, loss_rpn_cls: 0.0486, loss_rpn_bbox: 0.0172, s0.loss_cls: 0.1185, s0.acc: 96.5879, s0.loss_bbox: 0.0603, s1.loss_cls: 0.0501, s1.acc: 97.0327, s1.loss_bbox: 0.0449, s2.loss_cls: 0.0198, s2.acc: 97.5703, s2.loss_bbox: 0.0204, loss: 0.3798
+2022-03-30 15:52:12,969 - mmdet - INFO - Saving checkpoint at 4 epochs
+2022-03-30 15:52:56,893 - mmdet - INFO - Evaluating bbox...
+2022-03-30 15:52:57,892 - mmdet - INFO - 
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.113
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=1000 ] = 0.195
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=1000 ] = 0.127
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.052
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.041
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.150
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.298
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=300 ] = 0.298
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=1000 ] = 0.298
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.089
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.204
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.352
+
+2022-03-30 15:52:57,892 - mmdet - INFO - 
++---------------+-------+
+| category      | AP    |
++---------------+-------+
+| General trash | 0.113 |
++---------------+-------+
+2022-03-30 15:52:57,903 - mmdet - INFO - Exp name: cascade_rcnn_swin-s_single_target.py
+2022-03-30 15:52:57,904 - mmdet - INFO - Epoch(val) [4][412]	bbox_mAP: 0.1130, bbox_mAP_50: 0.1950, bbox_mAP_75: 0.1270, bbox_mAP_s: 0.0520, bbox_mAP_m: 0.0410, bbox_mAP_l: 0.1500, bbox_mAP_copypaste: 0.113 0.195 0.127 0.052 0.041 0.150
+2022-03-30 15:54:21,333 - mmdet - INFO - Epoch [5][50/212]	lr: 4.850e-04, eta: 2:51:39, time: 1.668, data_time: 0.083, memory: 28892, loss_rpn_cls: 0.0471, loss_rpn_bbox: 0.0193, s0.loss_cls: 0.1183, s0.acc: 96.5078, s0.loss_bbox: 0.0616, s1.loss_cls: 0.0496, s1.acc: 96.9551, s1.loss_bbox: 0.0443, s2.loss_cls: 0.0200, s2.acc: 97.5137, s2.loss_bbox: 0.0195, loss: 0.3796
+2022-03-30 15:55:40,795 - mmdet - INFO - Epoch [5][100/212]	lr: 4.850e-04, eta: 2:50:43, time: 1.589, data_time: 0.022, memory: 28892, loss_rpn_cls: 0.0469, loss_rpn_bbox: 0.0213, s0.loss_cls: 0.1117, s0.acc: 96.6445, s0.loss_bbox: 0.0566, s1.loss_cls: 0.0497, s1.acc: 96.8652, s1.loss_bbox: 0.0449, s2.loss_cls: 0.0207, s2.acc: 97.2915, s2.loss_bbox: 0.0209, loss: 0.3727
+2022-03-30 15:57:00,396 - mmdet - INFO - Epoch [5][150/212]	lr: 4.850e-04, eta: 2:49:47, time: 1.592, data_time: 0.022, memory: 28892, loss_rpn_cls: 0.0465, loss_rpn_bbox: 0.0169, s0.loss_cls: 0.1195, s0.acc: 96.5869, s0.loss_bbox: 0.0593, s1.loss_cls: 0.0500, s1.acc: 97.1025, s1.loss_bbox: 0.0422, s2.loss_cls: 0.0194, s2.acc: 97.7075, s2.loss_bbox: 0.0173, loss: 0.3712
+2022-03-30 15:58:20,989 - mmdet - INFO - Epoch [5][200/212]	lr: 4.850e-04, eta: 2:48:54, time: 1.612, data_time: 0.021, memory: 28892, loss_rpn_cls: 0.0418, loss_rpn_bbox: 0.0162, s0.loss_cls: 0.1168, s0.acc: 96.4033, s0.loss_bbox: 0.0572, s1.loss_cls: 0.0534, s1.acc: 96.5796, s1.loss_bbox: 0.0472, s2.loss_cls: 0.0225, s2.acc: 96.9082, s2.loss_bbox: 0.0230, loss: 0.3780
+2022-03-30 15:58:40,248 - mmdet - INFO - Saving checkpoint at 5 epochs
+2022-03-30 15:59:24,253 - mmdet - INFO - Evaluating bbox...
+2022-03-30 15:59:25,345 - mmdet - INFO - 
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.112
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=1000 ] = 0.210
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=1000 ] = 0.121
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.011
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.038
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.151
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.306
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=300 ] = 0.306
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=1000 ] = 0.306
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.072
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.222
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.355
+
+2022-03-30 15:59:25,345 - mmdet - INFO - 
++---------------+-------+
+| category      | AP    |
++---------------+-------+
+| General trash | 0.112 |
++---------------+-------+
+2022-03-30 15:59:25,356 - mmdet - INFO - Exp name: cascade_rcnn_swin-s_single_target.py
+2022-03-30 15:59:25,356 - mmdet - INFO - Epoch(val) [5][412]	bbox_mAP: 0.1120, bbox_mAP_50: 0.2100, bbox_mAP_75: 0.1210, bbox_mAP_s: 0.0110, bbox_mAP_m: 0.0380, bbox_mAP_l: 0.1510, bbox_mAP_copypaste: 0.112 0.210 0.121 0.011 0.038 0.151
+2022-03-30 16:00:48,418 - mmdet - INFO - Epoch [6][50/212]	lr: 4.766e-04, eta: 2:46:05, time: 1.661, data_time: 0.083, memory: 28892, loss_rpn_cls: 0.0463, loss_rpn_bbox: 0.0192, s0.loss_cls: 0.1159, s0.acc: 96.5337, s0.loss_bbox: 0.0560, s1.loss_cls: 0.0532, s1.acc: 96.7373, s1.loss_bbox: 0.0484, s2.loss_cls: 0.0218, s2.acc: 97.2729, s2.loss_bbox: 0.0224, loss: 0.3833
+2022-03-30 16:02:08,624 - mmdet - INFO - Epoch [6][100/212]	lr: 4.766e-04, eta: 2:45:10, time: 1.604, data_time: 0.022, memory: 28892, loss_rpn_cls: 0.0420, loss_rpn_bbox: 0.0157, s0.loss_cls: 0.1121, s0.acc: 96.6885, s0.loss_bbox: 0.0541, s1.loss_cls: 0.0501, s1.acc: 96.9242, s1.loss_bbox: 0.0436, s2.loss_cls: 0.0211, s2.acc: 97.3280, s2.loss_bbox: 0.0205, loss: 0.3593
+2022-03-30 16:03:27,977 - mmdet - INFO - Epoch [6][150/212]	lr: 4.766e-04, eta: 2:44:08, time: 1.587, data_time: 0.021, memory: 28892, loss_rpn_cls: 0.0538, loss_rpn_bbox: 0.0204, s0.loss_cls: 0.1178, s0.acc: 96.5713, s0.loss_bbox: 0.0589, s1.loss_cls: 0.0522, s1.acc: 96.8018, s1.loss_bbox: 0.0434, s2.loss_cls: 0.0217, s2.acc: 97.3091, s2.loss_bbox: 0.0198, loss: 0.3880
+2022-03-30 16:04:47,938 - mmdet - INFO - Epoch [6][200/212]	lr: 4.766e-04, eta: 2:43:08, time: 1.599, data_time: 0.022, memory: 28892, loss_rpn_cls: 0.0446, loss_rpn_bbox: 0.0168, s0.loss_cls: 0.1075, s0.acc: 96.9561, s0.loss_bbox: 0.0500, s1.loss_cls: 0.0478, s1.acc: 97.1738, s1.loss_bbox: 0.0405, s2.loss_cls: 0.0194, s2.acc: 97.5935, s2.loss_bbox: 0.0184, loss: 0.3452
+2022-03-30 16:05:07,255 - mmdet - INFO - Saving checkpoint at 6 epochs
+2022-03-30 16:05:51,059 - mmdet - INFO - Evaluating bbox...
+2022-03-30 16:05:52,274 - mmdet - INFO - 
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.125
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=1000 ] = 0.213
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=1000 ] = 0.139
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.018
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.044
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.170
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.316
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=300 ] = 0.316
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=1000 ] = 0.316
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.183
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.251
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.353
+
+2022-03-30 16:05:52,275 - mmdet - INFO - 
++---------------+-------+
+| category      | AP    |
++---------------+-------+
+| General trash | 0.125 |
++---------------+-------+
+2022-03-30 16:05:52,288 - mmdet - INFO - Exp name: cascade_rcnn_swin-s_single_target.py
+2022-03-30 16:05:52,288 - mmdet - INFO - Epoch(val) [6][412]	bbox_mAP: 0.1250, bbox_mAP_50: 0.2130, bbox_mAP_75: 0.1390, bbox_mAP_s: 0.0180, bbox_mAP_m: 0.0440, bbox_mAP_l: 0.1700, bbox_mAP_copypaste: 0.125 0.213 0.139 0.018 0.044 0.170
+2022-03-30 16:07:14,857 - mmdet - INFO - Epoch [7][50/212]	lr: 4.666e-04, eta: 2:40:32, time: 1.651, data_time: 0.083, memory: 28892, loss_rpn_cls: 0.0484, loss_rpn_bbox: 0.0186, s0.loss_cls: 0.1194, s0.acc: 96.3696, s0.loss_bbox: 0.0583, s1.loss_cls: 0.0522, s1.acc: 96.7002, s1.loss_bbox: 0.0455, s2.loss_cls: 0.0217, s2.acc: 97.2119, s2.loss_bbox: 0.0224, loss: 0.3866
+2022-03-30 16:08:35,351 - mmdet - INFO - Epoch [7][100/212]	lr: 4.666e-04, eta: 2:39:35, time: 1.610, data_time: 0.023, memory: 28892, loss_rpn_cls: 0.0424, loss_rpn_bbox: 0.0168, s0.loss_cls: 0.1106, s0.acc: 96.6128, s0.loss_bbox: 0.0539, s1.loss_cls: 0.0495, s1.acc: 96.9028, s1.loss_bbox: 0.0439, s2.loss_cls: 0.0209, s2.acc: 97.3261, s2.loss_bbox: 0.0212, loss: 0.3592
+2022-03-30 16:09:55,082 - mmdet - INFO - Epoch [7][150/212]	lr: 4.666e-04, eta: 2:38:33, time: 1.595, data_time: 0.022, memory: 28892, loss_rpn_cls: 0.0417, loss_rpn_bbox: 0.0177, s0.loss_cls: 0.1118, s0.acc: 96.5601, s0.loss_bbox: 0.0572, s1.loss_cls: 0.0501, s1.acc: 96.8364, s1.loss_bbox: 0.0467, s2.loss_cls: 0.0212, s2.acc: 97.3467, s2.loss_bbox: 0.0222, loss: 0.3686
+2022-03-30 16:11:14,428 - mmdet - INFO - Epoch [7][200/212]	lr: 4.666e-04, eta: 2:37:28, time: 1.587, data_time: 0.023, memory: 28892, loss_rpn_cls: 0.0424, loss_rpn_bbox: 0.0178, s0.loss_cls: 0.1121, s0.acc: 96.5532, s0.loss_bbox: 0.0557, s1.loss_cls: 0.0511, s1.acc: 96.7974, s1.loss_bbox: 0.0434, s2.loss_cls: 0.0215, s2.acc: 97.1836, s2.loss_bbox: 0.0204, loss: 0.3645
+2022-03-30 16:11:33,337 - mmdet - INFO - Saving checkpoint at 7 epochs
+2022-03-30 16:12:18,118 - mmdet - INFO - Evaluating bbox...
+2022-03-30 16:12:18,827 - mmdet - INFO - 
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.127
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=1000 ] = 0.217
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=1000 ] = 0.143
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.030
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.062
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.163
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.335
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=300 ] = 0.335
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=1000 ] = 0.335
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.111
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.258
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.380
+
+2022-03-30 16:12:18,827 - mmdet - INFO - 
++---------------+-------+
+| category      | AP    |
++---------------+-------+
+| General trash | 0.127 |
++---------------+-------+
+2022-03-30 16:12:18,845 - mmdet - INFO - Exp name: cascade_rcnn_swin-s_single_target.py
+2022-03-30 16:12:18,845 - mmdet - INFO - Epoch(val) [7][412]	bbox_mAP: 0.1270, bbox_mAP_50: 0.2170, bbox_mAP_75: 0.1430, bbox_mAP_s: 0.0300, bbox_mAP_m: 0.0620, bbox_mAP_l: 0.1630, bbox_mAP_copypaste: 0.127 0.217 0.143 0.030 0.062 0.163
+2022-03-30 16:13:41,280 - mmdet - INFO - Epoch [8][50/212]	lr: 4.549e-04, eta: 2:35:02, time: 1.648, data_time: 0.083, memory: 28892, loss_rpn_cls: 0.0445, loss_rpn_bbox: 0.0210, s0.loss_cls: 0.1089, s0.acc: 96.6201, s0.loss_bbox: 0.0537, s1.loss_cls: 0.0501, s1.acc: 96.8088, s1.loss_bbox: 0.0444, s2.loss_cls: 0.0217, s2.acc: 97.2449, s2.loss_bbox: 0.0213, loss: 0.3656
+2022-03-30 16:15:02,866 - mmdet - INFO - Epoch [8][100/212]	lr: 4.549e-04, eta: 2:34:06, time: 1.632, data_time: 0.024, memory: 28892, loss_rpn_cls: 0.0412, loss_rpn_bbox: 0.0173, s0.loss_cls: 0.1115, s0.acc: 96.5552, s0.loss_bbox: 0.0542, s1.loss_cls: 0.0516, s1.acc: 96.6567, s1.loss_bbox: 0.0449, s2.loss_cls: 0.0217, s2.acc: 97.1245, s2.loss_bbox: 0.0224, loss: 0.3648
+2022-03-30 16:16:23,433 - mmdet - INFO - Epoch [8][150/212]	lr: 4.549e-04, eta: 2:33:05, time: 1.611, data_time: 0.024, memory: 28892, loss_rpn_cls: 0.0393, loss_rpn_bbox: 0.0155, s0.loss_cls: 0.1174, s0.acc: 96.3311, s0.loss_bbox: 0.0591, s1.loss_cls: 0.0536, s1.acc: 96.4800, s1.loss_bbox: 0.0479, s2.loss_cls: 0.0228, s2.acc: 97.0337, s2.loss_bbox: 0.0236, loss: 0.3792
+2022-03-30 16:17:43,713 - mmdet - INFO - Epoch [8][200/212]	lr: 4.549e-04, eta: 2:32:01, time: 1.606, data_time: 0.023, memory: 28892, loss_rpn_cls: 0.0402, loss_rpn_bbox: 0.0189, s0.loss_cls: 0.1184, s0.acc: 96.2280, s0.loss_bbox: 0.0603, s1.loss_cls: 0.0544, s1.acc: 96.3887, s1.loss_bbox: 0.0503, s2.loss_cls: 0.0231, s2.acc: 96.9385, s2.loss_bbox: 0.0254, loss: 0.3909
+2022-03-30 16:18:03,071 - mmdet - INFO - Saving checkpoint at 8 epochs
+2022-03-30 16:18:47,962 - mmdet - INFO - Evaluating bbox...
+2022-03-30 16:18:49,015 - mmdet - INFO - 
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.146
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=1000 ] = 0.241
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=1000 ] = 0.162
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.029
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.057
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.192
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.340
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=300 ] = 0.340
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=1000 ] = 0.340
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.122
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.240
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.397
+
+2022-03-30 16:18:49,015 - mmdet - INFO - 
++---------------+-------+
+| category      | AP    |
++---------------+-------+
+| General trash | 0.146 |
++---------------+-------+
+2022-03-30 16:18:49,024 - mmdet - INFO - Exp name: cascade_rcnn_swin-s_single_target.py
+2022-03-30 16:18:49,024 - mmdet - INFO - Epoch(val) [8][412]	bbox_mAP: 0.1460, bbox_mAP_50: 0.2410, bbox_mAP_75: 0.1620, bbox_mAP_s: 0.0290, bbox_mAP_m: 0.0570, bbox_mAP_l: 0.1920, bbox_mAP_copypaste: 0.146 0.241 0.162 0.029 0.057 0.192
+2022-03-30 16:20:13,132 - mmdet - INFO - Epoch [9][50/212]	lr: 4.416e-04, eta: 2:29:49, time: 1.682, data_time: 0.083, memory: 28892, loss_rpn_cls: 0.0400, loss_rpn_bbox: 0.0180, s0.loss_cls: 0.1132, s0.acc: 96.4512, s0.loss_bbox: 0.0546, s1.loss_cls: 0.0533, s1.acc: 96.5288, s1.loss_bbox: 0.0482, s2.loss_cls: 0.0231, s2.acc: 96.9531, s2.loss_bbox: 0.0244, loss: 0.3749
+2022-03-30 16:21:32,512 - mmdet - INFO - Epoch [9][100/212]	lr: 4.416e-04, eta: 2:28:43, time: 1.588, data_time: 0.022, memory: 28892, loss_rpn_cls: 0.0418, loss_rpn_bbox: 0.0156, s0.loss_cls: 0.1160, s0.acc: 96.3960, s0.loss_bbox: 0.0537, s1.loss_cls: 0.0548, s1.acc: 96.4906, s1.loss_bbox: 0.0442, s2.loss_cls: 0.0239, s2.acc: 96.7947, s2.loss_bbox: 0.0226, loss: 0.3726
+2022-03-30 16:22:52,870 - mmdet - INFO - Epoch [9][150/212]	lr: 4.416e-04, eta: 2:27:38, time: 1.607, data_time: 0.022, memory: 28892, loss_rpn_cls: 0.0397, loss_rpn_bbox: 0.0184, s0.loss_cls: 0.1150, s0.acc: 96.2651, s0.loss_bbox: 0.0579, s1.loss_cls: 0.0546, s1.acc: 96.4038, s1.loss_bbox: 0.0496, s2.loss_cls: 0.0239, s2.acc: 96.7426, s2.loss_bbox: 0.0253, loss: 0.3844
+2022-03-30 16:24:12,507 - mmdet - INFO - Epoch [9][200/212]	lr: 4.416e-04, eta: 2:26:31, time: 1.593, data_time: 0.022, memory: 28892, loss_rpn_cls: 0.0364, loss_rpn_bbox: 0.0156, s0.loss_cls: 0.1078, s0.acc: 96.6084, s0.loss_bbox: 0.0506, s1.loss_cls: 0.0506, s1.acc: 96.6853, s1.loss_bbox: 0.0441, s2.loss_cls: 0.0226, s2.acc: 96.8318, s2.loss_bbox: 0.0231, loss: 0.3508
+2022-03-30 16:24:31,636 - mmdet - INFO - Saving checkpoint at 9 epochs
+2022-03-30 16:25:16,103 - mmdet - INFO - Evaluating bbox...
+2022-03-30 16:25:17,241 - mmdet - INFO - 
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.124
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=1000 ] = 0.213
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=1000 ] = 0.134
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.067
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.061
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.163
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.360
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=300 ] = 0.360
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=1000 ] = 0.360
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.194
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.306
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.392
+
+2022-03-30 16:25:17,241 - mmdet - INFO - 
++---------------+-------+
+| category      | AP    |
++---------------+-------+
+| General trash | 0.124 |
++---------------+-------+
+2022-03-30 16:25:17,252 - mmdet - INFO - Exp name: cascade_rcnn_swin-s_single_target.py
+2022-03-30 16:25:17,253 - mmdet - INFO - Epoch(val) [9][412]	bbox_mAP: 0.1240, bbox_mAP_50: 0.2130, bbox_mAP_75: 0.1340, bbox_mAP_s: 0.0670, bbox_mAP_m: 0.0610, bbox_mAP_l: 0.1630, bbox_mAP_copypaste: 0.124 0.213 0.134 0.067 0.061 0.163
+2022-03-30 16:26:40,681 - mmdet - INFO - Epoch [10][50/212]	lr: 4.269e-04, eta: 2:24:22, time: 1.668, data_time: 0.083, memory: 28892, loss_rpn_cls: 0.0352, loss_rpn_bbox: 0.0164, s0.loss_cls: 0.1128, s0.acc: 96.3105, s0.loss_bbox: 0.0569, s1.loss_cls: 0.0525, s1.acc: 96.4462, s1.loss_bbox: 0.0478, s2.loss_cls: 0.0233, s2.acc: 96.6567, s2.loss_bbox: 0.0247, loss: 0.3696
+2022-03-30 16:28:00,525 - mmdet - INFO - Epoch [10][100/212]	lr: 4.269e-04, eta: 2:23:16, time: 1.597, data_time: 0.022, memory: 28892, loss_rpn_cls: 0.0347, loss_rpn_bbox: 0.0187, s0.loss_cls: 0.1190, s0.acc: 96.1050, s0.loss_bbox: 0.0578, s1.loss_cls: 0.0565, s1.acc: 96.1111, s1.loss_bbox: 0.0520, s2.loss_cls: 0.0254, s2.acc: 96.4294, s2.loss_bbox: 0.0272, loss: 0.3913
+2022-03-30 16:29:19,812 - mmdet - INFO - Epoch [10][150/212]	lr: 4.269e-04, eta: 2:22:07, time: 1.586, data_time: 0.022, memory: 28892, loss_rpn_cls: 0.0380, loss_rpn_bbox: 0.0172, s0.loss_cls: 0.1095, s0.acc: 96.6172, s0.loss_bbox: 0.0517, s1.loss_cls: 0.0503, s1.acc: 96.7476, s1.loss_bbox: 0.0417, s2.loss_cls: 0.0222, s2.acc: 97.0146, s2.loss_bbox: 0.0214, loss: 0.3520
+2022-03-30 16:30:38,970 - mmdet - INFO - Epoch [10][200/212]	lr: 4.269e-04, eta: 2:20:58, time: 1.583, data_time: 0.023, memory: 28892, loss_rpn_cls: 0.0357, loss_rpn_bbox: 0.0146, s0.loss_cls: 0.1154, s0.acc: 96.4570, s0.loss_bbox: 0.0528, s1.loss_cls: 0.0546, s1.acc: 96.5415, s1.loss_bbox: 0.0442, s2.loss_cls: 0.0240, s2.acc: 96.8320, s2.loss_bbox: 0.0220, loss: 0.3632
+2022-03-30 16:30:58,233 - mmdet - INFO - Saving checkpoint at 10 epochs
+2022-03-30 16:31:42,323 - mmdet - INFO - Evaluating bbox...
+2022-03-30 16:31:43,464 - mmdet - INFO - 
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.152
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=1000 ] = 0.251
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=1000 ] = 0.166
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.044
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.061
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.203
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.388
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=300 ] = 0.388
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=1000 ] = 0.388
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.133
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.312
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.434
+
+2022-03-30 16:31:43,464 - mmdet - INFO - 
++---------------+-------+
+| category      | AP    |
++---------------+-------+
+| General trash | 0.152 |
++---------------+-------+
+2022-03-30 16:31:43,476 - mmdet - INFO - Exp name: cascade_rcnn_swin-s_single_target.py
+2022-03-30 16:31:43,477 - mmdet - INFO - Epoch(val) [10][412]	bbox_mAP: 0.1520, bbox_mAP_50: 0.2510, bbox_mAP_75: 0.1660, bbox_mAP_s: 0.0440, bbox_mAP_m: 0.0610, bbox_mAP_l: 0.2030, bbox_mAP_copypaste: 0.152 0.251 0.166 0.044 0.061 0.203
+2022-03-30 16:33:06,447 - mmdet - INFO - Epoch [11][50/212]	lr: 4.109e-04, eta: 2:18:53, time: 1.659, data_time: 0.083, memory: 28892, loss_rpn_cls: 0.0322, loss_rpn_bbox: 0.0139, s0.loss_cls: 0.1110, s0.acc: 96.2251, s0.loss_bbox: 0.0579, s1.loss_cls: 0.0521, s1.acc: 96.3797, s1.loss_bbox: 0.0521, s2.loss_cls: 0.0232, s2.acc: 96.6347, s2.loss_bbox: 0.0279, loss: 0.3704
+2022-03-30 16:34:27,273 - mmdet - INFO - Epoch [11][100/212]	lr: 4.109e-04, eta: 2:17:47, time: 1.617, data_time: 0.022, memory: 28892, loss_rpn_cls: 0.0333, loss_rpn_bbox: 0.0152, s0.loss_cls: 0.1014, s0.acc: 96.7471, s0.loss_bbox: 0.0474, s1.loss_cls: 0.0482, s1.acc: 96.7383, s1.loss_bbox: 0.0426, s2.loss_cls: 0.0211, s2.acc: 97.0825, s2.loss_bbox: 0.0225, loss: 0.3317
+2022-03-30 16:35:47,098 - mmdet - INFO - Epoch [11][150/212]	lr: 4.109e-04, eta: 2:16:39, time: 1.596, data_time: 0.022, memory: 28892, loss_rpn_cls: 0.0374, loss_rpn_bbox: 0.0151, s0.loss_cls: 0.1211, s0.acc: 96.0205, s0.loss_bbox: 0.0589, s1.loss_cls: 0.0569, s1.acc: 96.0865, s1.loss_bbox: 0.0486, s2.loss_cls: 0.0249, s2.acc: 96.4554, s2.loss_bbox: 0.0235, loss: 0.3865
+2022-03-30 16:37:07,351 - mmdet - INFO - Epoch [11][200/212]	lr: 4.109e-04, eta: 2:15:31, time: 1.605, data_time: 0.022, memory: 28892, loss_rpn_cls: 0.0328, loss_rpn_bbox: 0.0139, s0.loss_cls: 0.1109, s0.acc: 96.4287, s0.loss_bbox: 0.0528, s1.loss_cls: 0.0532, s1.acc: 96.4355, s1.loss_bbox: 0.0449, s2.loss_cls: 0.0233, s2.acc: 96.7832, s2.loss_bbox: 0.0236, loss: 0.3553
+2022-03-30 16:37:27,016 - mmdet - INFO - Saving checkpoint at 11 epochs
+2022-03-30 16:38:12,313 - mmdet - INFO - Evaluating bbox...
+2022-03-30 16:38:13,515 - mmdet - INFO - 
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.171
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=1000 ] = 0.266
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=1000 ] = 0.187
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.018
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.062
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.231
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.386
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=300 ] = 0.386
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=1000 ] = 0.386
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.150
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.269
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.451
+
+2022-03-30 16:38:13,515 - mmdet - INFO - 
++---------------+-------+
+| category      | AP    |
++---------------+-------+
+| General trash | 0.171 |
++---------------+-------+
+2022-03-30 16:38:13,525 - mmdet - INFO - Exp name: cascade_rcnn_swin-s_single_target.py
+2022-03-30 16:38:13,525 - mmdet - INFO - Epoch(val) [11][412]	bbox_mAP: 0.1710, bbox_mAP_50: 0.2660, bbox_mAP_75: 0.1870, bbox_mAP_s: 0.0180, bbox_mAP_m: 0.0620, bbox_mAP_l: 0.2310, bbox_mAP_copypaste: 0.171 0.266 0.187 0.018 0.062 0.231
+2022-03-30 16:39:36,917 - mmdet - INFO - Epoch [12][50/212]	lr: 3.936e-04, eta: 2:13:31, time: 1.667, data_time: 0.084, memory: 28892, loss_rpn_cls: 0.0329, loss_rpn_bbox: 0.0159, s0.loss_cls: 0.1035, s0.acc: 96.6802, s0.loss_bbox: 0.0501, s1.loss_cls: 0.0491, s1.acc: 96.7086, s1.loss_bbox: 0.0434, s2.loss_cls: 0.0223, s2.acc: 96.9190, s2.loss_bbox: 0.0234, loss: 0.3404
+2022-03-30 16:40:56,665 - mmdet - INFO - Epoch [12][100/212]	lr: 3.936e-04, eta: 2:12:22, time: 1.595, data_time: 0.022, memory: 28892, loss_rpn_cls: 0.0355, loss_rpn_bbox: 0.0151, s0.loss_cls: 0.1086, s0.acc: 96.4277, s0.loss_bbox: 0.0539, s1.loss_cls: 0.0515, s1.acc: 96.4427, s1.loss_bbox: 0.0469, s2.loss_cls: 0.0230, s2.acc: 96.6705, s2.loss_bbox: 0.0250, loss: 0.3595
+2022-03-30 16:42:16,483 - mmdet - INFO - Epoch [12][150/212]	lr: 3.936e-04, eta: 2:11:13, time: 1.596, data_time: 0.022, memory: 28892, loss_rpn_cls: 0.0335, loss_rpn_bbox: 0.0168, s0.loss_cls: 0.1092, s0.acc: 96.3999, s0.loss_bbox: 0.0518, s1.loss_cls: 0.0533, s1.acc: 96.3198, s1.loss_bbox: 0.0481, s2.loss_cls: 0.0239, s2.acc: 96.4863, s2.loss_bbox: 0.0252, loss: 0.3619
+2022-03-30 16:43:35,710 - mmdet - INFO - Epoch [12][200/212]	lr: 3.936e-04, eta: 2:10:02, time: 1.585, data_time: 0.022, memory: 28892, loss_rpn_cls: 0.0302, loss_rpn_bbox: 0.0145, s0.loss_cls: 0.1031, s0.acc: 96.6128, s0.loss_bbox: 0.0517, s1.loss_cls: 0.0507, s1.acc: 96.5925, s1.loss_bbox: 0.0466, s2.loss_cls: 0.0226, s2.acc: 96.8054, s2.loss_bbox: 0.0250, loss: 0.3444
+2022-03-30 16:43:54,564 - mmdet - INFO - Saving checkpoint at 12 epochs
+2022-03-30 16:44:38,770 - mmdet - INFO - Evaluating bbox...
+2022-03-30 16:44:39,709 - mmdet - INFO - 
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.183
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=1000 ] = 0.275
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=1000 ] = 0.201
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.021
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.064
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.245
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.404
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=300 ] = 0.404
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=1000 ] = 0.404
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.128
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.322
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.453
+
+2022-03-30 16:44:39,710 - mmdet - INFO - 
++---------------+-------+
+| category      | AP    |
++---------------+-------+
+| General trash | 0.183 |
++---------------+-------+
+2022-03-30 16:44:39,719 - mmdet - INFO - Exp name: cascade_rcnn_swin-s_single_target.py
+2022-03-30 16:44:39,720 - mmdet - INFO - Epoch(val) [12][412]	bbox_mAP: 0.1830, bbox_mAP_50: 0.2750, bbox_mAP_75: 0.2010, bbox_mAP_s: 0.0210, bbox_mAP_m: 0.0640, bbox_mAP_l: 0.2450, bbox_mAP_copypaste: 0.183 0.275 0.201 0.021 0.064 0.245
+2022-03-30 16:46:01,771 - mmdet - INFO - Epoch [13][50/212]	lr: 3.753e-04, eta: 2:08:02, time: 1.640, data_time: 0.083, memory: 28892, loss_rpn_cls: 0.0311, loss_rpn_bbox: 0.0145, s0.loss_cls: 0.1023, s0.acc: 96.5430, s0.loss_bbox: 0.0521, s1.loss_cls: 0.0498, s1.acc: 96.3963, s1.loss_bbox: 0.0463, s2.loss_cls: 0.0223, s2.acc: 96.6404, s2.loss_bbox: 0.0242, loss: 0.3424
+2022-03-30 16:47:21,795 - mmdet - INFO - Epoch [13][100/212]	lr: 3.753e-04, eta: 2:06:53, time: 1.600, data_time: 0.022, memory: 28892, loss_rpn_cls: 0.0345, loss_rpn_bbox: 0.0160, s0.loss_cls: 0.1025, s0.acc: 96.6660, s0.loss_bbox: 0.0501, s1.loss_cls: 0.0490, s1.acc: 96.6855, s1.loss_bbox: 0.0425, s2.loss_cls: 0.0226, s2.acc: 96.8516, s2.loss_bbox: 0.0234, loss: 0.3406
+2022-03-30 16:48:42,745 - mmdet - INFO - Epoch [13][150/212]	lr: 3.753e-04, eta: 2:05:45, time: 1.619, data_time: 0.023, memory: 28892, loss_rpn_cls: 0.0366, loss_rpn_bbox: 0.0166, s0.loss_cls: 0.1123, s0.acc: 96.2104, s0.loss_bbox: 0.0557, s1.loss_cls: 0.0532, s1.acc: 96.2763, s1.loss_bbox: 0.0487, s2.loss_cls: 0.0236, s2.acc: 96.5524, s2.loss_bbox: 0.0254, loss: 0.3721
+2022-03-30 16:50:03,075 - mmdet - INFO - Epoch [13][200/212]	lr: 3.753e-04, eta: 2:04:36, time: 1.607, data_time: 0.023, memory: 28892, loss_rpn_cls: 0.0339, loss_rpn_bbox: 0.0185, s0.loss_cls: 0.1049, s0.acc: 96.5659, s0.loss_bbox: 0.0486, s1.loss_cls: 0.0519, s1.acc: 96.4183, s1.loss_bbox: 0.0463, s2.loss_cls: 0.0234, s2.acc: 96.7327, s2.loss_bbox: 0.0244, loss: 0.3518
+2022-03-30 16:50:22,614 - mmdet - INFO - Saving checkpoint at 13 epochs
+2022-03-30 16:51:06,968 - mmdet - INFO - Evaluating bbox...
+2022-03-30 16:51:08,391 - mmdet - INFO - 
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.152
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=1000 ] = 0.231
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=1000 ] = 0.167
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.007
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.060
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.217
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.409
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=300 ] = 0.409
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=1000 ] = 0.409
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.156
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.303
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.470
+
+2022-03-30 16:51:08,392 - mmdet - INFO - 
++---------------+-------+
+| category      | AP    |
++---------------+-------+
+| General trash | 0.152 |
++---------------+-------+
+2022-03-30 16:51:08,403 - mmdet - INFO - Exp name: cascade_rcnn_swin-s_single_target.py
+2022-03-30 16:51:08,403 - mmdet - INFO - Epoch(val) [13][412]	bbox_mAP: 0.1520, bbox_mAP_50: 0.2310, bbox_mAP_75: 0.1670, bbox_mAP_s: 0.0070, bbox_mAP_m: 0.0600, bbox_mAP_l: 0.2170, bbox_mAP_copypaste: 0.152 0.231 0.167 0.007 0.060 0.217
+2022-03-30 16:52:31,234 - mmdet - INFO - Epoch [14][50/212]	lr: 3.559e-04, eta: 2:02:40, time: 1.656, data_time: 0.083, memory: 28892, loss_rpn_cls: 0.0315, loss_rpn_bbox: 0.0149, s0.loss_cls: 0.1048, s0.acc: 96.3970, s0.loss_bbox: 0.0541, s1.loss_cls: 0.0515, s1.acc: 96.2916, s1.loss_bbox: 0.0520, s2.loss_cls: 0.0232, s2.acc: 96.6632, s2.loss_bbox: 0.0268, loss: 0.3587
+2022-03-30 16:53:52,423 - mmdet - INFO - Epoch [14][100/212]	lr: 3.559e-04, eta: 2:01:32, time: 1.624, data_time: 0.023, memory: 28892, loss_rpn_cls: 0.0360, loss_rpn_bbox: 0.0149, s0.loss_cls: 0.1139, s0.acc: 96.2192, s0.loss_bbox: 0.0539, s1.loss_cls: 0.0556, s1.acc: 96.1804, s1.loss_bbox: 0.0489, s2.loss_cls: 0.0246, s2.acc: 96.5919, s2.loss_bbox: 0.0263, loss: 0.3742
+2022-03-30 16:55:11,581 - mmdet - INFO - Epoch [14][150/212]	lr: 3.559e-04, eta: 2:00:21, time: 1.583, data_time: 0.022, memory: 28892, loss_rpn_cls: 0.0308, loss_rpn_bbox: 0.0153, s0.loss_cls: 0.0995, s0.acc: 96.6040, s0.loss_bbox: 0.0477, s1.loss_cls: 0.0486, s1.acc: 96.5691, s1.loss_bbox: 0.0430, s2.loss_cls: 0.0225, s2.acc: 96.6871, s2.loss_bbox: 0.0241, loss: 0.3315
+2022-03-30 16:56:32,479 - mmdet - INFO - Epoch [14][200/212]	lr: 3.559e-04, eta: 1:59:11, time: 1.618, data_time: 0.023, memory: 28892, loss_rpn_cls: 0.0309, loss_rpn_bbox: 0.0155, s0.loss_cls: 0.1030, s0.acc: 96.6094, s0.loss_bbox: 0.0503, s1.loss_cls: 0.0487, s1.acc: 96.6653, s1.loss_bbox: 0.0430, s2.loss_cls: 0.0218, s2.acc: 96.8851, s2.loss_bbox: 0.0228, loss: 0.3360
+2022-03-30 16:56:51,424 - mmdet - INFO - Saving checkpoint at 14 epochs
+2022-03-30 16:57:35,643 - mmdet - INFO - Evaluating bbox...
+2022-03-30 16:57:36,346 - mmdet - INFO - 
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.195
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=1000 ] = 0.290
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=1000 ] = 0.212
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.018
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.065
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.263
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.388
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=300 ] = 0.388
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=1000 ] = 0.388
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.050
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.244
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.471
+
+2022-03-30 16:57:36,347 - mmdet - INFO - 
++---------------+-------+
+| category      | AP    |
++---------------+-------+
+| General trash | 0.195 |
++---------------+-------+
+2022-03-30 16:57:36,356 - mmdet - INFO - Exp name: cascade_rcnn_swin-s_single_target.py
+2022-03-30 16:57:36,356 - mmdet - INFO - Epoch(val) [14][412]	bbox_mAP: 0.1950, bbox_mAP_50: 0.2900, bbox_mAP_75: 0.2120, bbox_mAP_s: 0.0180, bbox_mAP_m: 0.0650, bbox_mAP_l: 0.2630, bbox_mAP_copypaste: 0.195 0.290 0.212 0.018 0.065 0.263
+2022-03-30 16:58:59,208 - mmdet - INFO - Epoch [15][50/212]	lr: 3.358e-04, eta: 1:57:18, time: 1.657, data_time: 0.083, memory: 28892, loss_rpn_cls: 0.0294, loss_rpn_bbox: 0.0138, s0.loss_cls: 0.0975, s0.acc: 96.7183, s0.loss_bbox: 0.0484, s1.loss_cls: 0.0466, s1.acc: 96.7610, s1.loss_bbox: 0.0430, s2.loss_cls: 0.0214, s2.acc: 96.9265, s2.loss_bbox: 0.0243, loss: 0.3245
+2022-03-30 17:00:20,130 - mmdet - INFO - Epoch [15][100/212]	lr: 3.358e-04, eta: 1:56:09, time: 1.618, data_time: 0.022, memory: 28892, loss_rpn_cls: 0.0315, loss_rpn_bbox: 0.0151, s0.loss_cls: 0.1042, s0.acc: 96.5073, s0.loss_bbox: 0.0505, s1.loss_cls: 0.0504, s1.acc: 96.5109, s1.loss_bbox: 0.0466, s2.loss_cls: 0.0223, s2.acc: 96.8556, s2.loss_bbox: 0.0245, loss: 0.3451
+2022-03-30 17:01:40,837 - mmdet - INFO - Epoch [15][150/212]	lr: 3.358e-04, eta: 1:54:59, time: 1.614, data_time: 0.022, memory: 28892, loss_rpn_cls: 0.0288, loss_rpn_bbox: 0.0137, s0.loss_cls: 0.1061, s0.acc: 96.3872, s0.loss_bbox: 0.0532, s1.loss_cls: 0.0518, s1.acc: 96.2897, s1.loss_bbox: 0.0475, s2.loss_cls: 0.0241, s2.acc: 96.3969, s2.loss_bbox: 0.0265, loss: 0.3518
+2022-03-30 17:03:00,669 - mmdet - INFO - Epoch [15][200/212]	lr: 3.358e-04, eta: 1:53:47, time: 1.597, data_time: 0.022, memory: 28892, loss_rpn_cls: 0.0302, loss_rpn_bbox: 0.0158, s0.loss_cls: 0.1093, s0.acc: 96.4082, s0.loss_bbox: 0.0519, s1.loss_cls: 0.0530, s1.acc: 96.3528, s1.loss_bbox: 0.0476, s2.loss_cls: 0.0243, s2.acc: 96.4679, s2.loss_bbox: 0.0256, loss: 0.3576
+2022-03-30 17:03:19,671 - mmdet - INFO - Saving checkpoint at 15 epochs
+2022-03-30 17:04:03,232 - mmdet - INFO - Evaluating bbox...
+2022-03-30 17:04:04,132 - mmdet - INFO - 
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.183
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=1000 ] = 0.278
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=1000 ] = 0.202
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.042
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.076
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.240
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.394
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=300 ] = 0.394
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=1000 ] = 0.394
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.189
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.276
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.458
+
+2022-03-30 17:04:04,133 - mmdet - INFO - 
++---------------+-------+
+| category      | AP    |
++---------------+-------+
+| General trash | 0.183 |
++---------------+-------+
+2022-03-30 17:04:04,142 - mmdet - INFO - Exp name: cascade_rcnn_swin-s_single_target.py
+2022-03-30 17:04:04,142 - mmdet - INFO - Epoch(val) [15][412]	bbox_mAP: 0.1830, bbox_mAP_50: 0.2780, bbox_mAP_75: 0.2020, bbox_mAP_s: 0.0420, bbox_mAP_m: 0.0760, bbox_mAP_l: 0.2400, bbox_mAP_copypaste: 0.183 0.278 0.202 0.042 0.076 0.240
+2022-03-30 17:05:26,431 - mmdet - INFO - Epoch [16][50/212]	lr: 3.151e-04, eta: 1:51:55, time: 1.645, data_time: 0.083, memory: 28892, loss_rpn_cls: 0.0266, loss_rpn_bbox: 0.0139, s0.loss_cls: 0.0967, s0.acc: 96.6924, s0.loss_bbox: 0.0485, s1.loss_cls: 0.0466, s1.acc: 96.6949, s1.loss_bbox: 0.0468, s2.loss_cls: 0.0212, s2.acc: 96.8917, s2.loss_bbox: 0.0259, loss: 0.3263
+2022-03-30 17:06:45,196 - mmdet - INFO - Epoch [16][100/212]	lr: 3.151e-04, eta: 1:50:42, time: 1.575, data_time: 0.021, memory: 28892, loss_rpn_cls: 0.0291, loss_rpn_bbox: 0.0135, s0.loss_cls: 0.1104, s0.acc: 96.1851, s0.loss_bbox: 0.0579, s1.loss_cls: 0.0538, s1.acc: 96.2291, s1.loss_bbox: 0.0507, s2.loss_cls: 0.0246, s2.acc: 96.5308, s2.loss_bbox: 0.0275, loss: 0.3675
+2022-03-30 17:08:04,312 - mmdet - INFO - Epoch [16][150/212]	lr: 3.151e-04, eta: 1:49:29, time: 1.582, data_time: 0.022, memory: 28892, loss_rpn_cls: 0.0240, loss_rpn_bbox: 0.0169, s0.loss_cls: 0.1018, s0.acc: 96.4014, s0.loss_bbox: 0.0536, s1.loss_cls: 0.0505, s1.acc: 96.3650, s1.loss_bbox: 0.0480, s2.loss_cls: 0.0234, s2.acc: 96.6130, s2.loss_bbox: 0.0256, loss: 0.3439
+2022-03-30 17:09:23,103 - mmdet - INFO - Epoch [16][200/212]	lr: 3.151e-04, eta: 1:48:16, time: 1.576, data_time: 0.022, memory: 28892, loss_rpn_cls: 0.0267, loss_rpn_bbox: 0.0139, s0.loss_cls: 0.1001, s0.acc: 96.6689, s0.loss_bbox: 0.0463, s1.loss_cls: 0.0499, s1.acc: 96.4888, s1.loss_bbox: 0.0451, s2.loss_cls: 0.0233, s2.acc: 96.7271, s2.loss_bbox: 0.0259, loss: 0.3312
+2022-03-30 17:09:42,172 - mmdet - INFO - Saving checkpoint at 16 epochs
+2022-03-30 17:10:26,861 - mmdet - INFO - Evaluating bbox...
+2022-03-30 17:10:27,887 - mmdet - INFO - 
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.190
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=1000 ] = 0.290
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=1000 ] = 0.208
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.011
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.077
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.248
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.427
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=300 ] = 0.427
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=1000 ] = 0.427
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.194
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.333
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.481
+
+2022-03-30 17:10:27,888 - mmdet - INFO - 
++---------------+-------+
+| category      | AP    |
++---------------+-------+
+| General trash | 0.190 |
++---------------+-------+
+2022-03-30 17:10:27,897 - mmdet - INFO - Exp name: cascade_rcnn_swin-s_single_target.py
+2022-03-30 17:10:27,898 - mmdet - INFO - Epoch(val) [16][412]	bbox_mAP: 0.1900, bbox_mAP_50: 0.2900, bbox_mAP_75: 0.2080, bbox_mAP_s: 0.0110, bbox_mAP_m: 0.0770, bbox_mAP_l: 0.2480, bbox_mAP_copypaste: 0.190 0.290 0.208 0.011 0.077 0.248
+2022-03-30 17:11:50,540 - mmdet - INFO - Epoch [17][50/212]	lr: 2.938e-04, eta: 1:46:27, time: 1.652, data_time: 0.083, memory: 28892, loss_rpn_cls: 0.0276, loss_rpn_bbox: 0.0167, s0.loss_cls: 0.0932, s0.acc: 96.6597, s0.loss_bbox: 0.0491, s1.loss_cls: 0.0454, s1.acc: 96.6958, s1.loss_bbox: 0.0478, s2.loss_cls: 0.0207, s2.acc: 96.9062, s2.loss_bbox: 0.0257, loss: 0.3263
+2022-03-30 17:13:12,120 - mmdet - INFO - Epoch [17][100/212]	lr: 2.938e-04, eta: 1:45:17, time: 1.632, data_time: 0.023, memory: 28892, loss_rpn_cls: 0.0233, loss_rpn_bbox: 0.0145, s0.loss_cls: 0.1022, s0.acc: 96.3799, s0.loss_bbox: 0.0509, s1.loss_cls: 0.0511, s1.acc: 96.2940, s1.loss_bbox: 0.0480, s2.loss_cls: 0.0238, s2.acc: 96.4847, s2.loss_bbox: 0.0265, loss: 0.3403
+2022-03-30 17:14:31,022 - mmdet - INFO - Epoch [17][150/212]	lr: 2.938e-04, eta: 1:44:03, time: 1.578, data_time: 0.022, memory: 28892, loss_rpn_cls: 0.0264, loss_rpn_bbox: 0.0137, s0.loss_cls: 0.1018, s0.acc: 96.4878, s0.loss_bbox: 0.0508, s1.loss_cls: 0.0502, s1.acc: 96.4275, s1.loss_bbox: 0.0489, s2.loss_cls: 0.0236, s2.acc: 96.5403, s2.loss_bbox: 0.0277, loss: 0.3431
+2022-03-30 17:15:50,548 - mmdet - INFO - Epoch [17][200/212]	lr: 2.938e-04, eta: 1:42:51, time: 1.590, data_time: 0.022, memory: 28892, loss_rpn_cls: 0.0257, loss_rpn_bbox: 0.0120, s0.loss_cls: 0.0986, s0.acc: 96.5620, s0.loss_bbox: 0.0489, s1.loss_cls: 0.0498, s1.acc: 96.3557, s1.loss_bbox: 0.0477, s2.loss_cls: 0.0233, s2.acc: 96.5190, s2.loss_bbox: 0.0276, loss: 0.3336
+2022-03-30 17:16:09,338 - mmdet - INFO - Saving checkpoint at 17 epochs
+2022-03-30 17:16:54,756 - mmdet - INFO - Evaluating bbox...
+2022-03-30 17:16:55,766 - mmdet - INFO - 
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.182
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=1000 ] = 0.272
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=1000 ] = 0.197
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.029
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.092
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.259
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.431
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=300 ] = 0.431
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=1000 ] = 0.431
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.161
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.338
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.486
+
+2022-03-30 17:16:55,767 - mmdet - INFO - 
++---------------+-------+
+| category      | AP    |
++---------------+-------+
+| General trash | 0.182 |
++---------------+-------+
+2022-03-30 17:16:55,775 - mmdet - INFO - Exp name: cascade_rcnn_swin-s_single_target.py
+2022-03-30 17:16:55,776 - mmdet - INFO - Epoch(val) [17][412]	bbox_mAP: 0.1820, bbox_mAP_50: 0.2720, bbox_mAP_75: 0.1970, bbox_mAP_s: 0.0290, bbox_mAP_m: 0.0920, bbox_mAP_l: 0.2590, bbox_mAP_copypaste: 0.182 0.272 0.197 0.029 0.092 0.259
+2022-03-30 17:18:18,283 - mmdet - INFO - Epoch [18][50/212]	lr: 2.722e-04, eta: 1:41:03, time: 1.650, data_time: 0.082, memory: 28892, loss_rpn_cls: 0.0218, loss_rpn_bbox: 0.0114, s0.loss_cls: 0.0914, s0.acc: 96.8486, s0.loss_bbox: 0.0449, s1.loss_cls: 0.0465, s1.acc: 96.7046, s1.loss_bbox: 0.0461, s2.loss_cls: 0.0216, s2.acc: 96.8841, s2.loss_bbox: 0.0276, loss: 0.3114
+2022-03-30 17:19:38,594 - mmdet - INFO - Epoch [18][100/212]	lr: 2.722e-04, eta: 1:39:51, time: 1.606, data_time: 0.022, memory: 28892, loss_rpn_cls: 0.0245, loss_rpn_bbox: 0.0151, s0.loss_cls: 0.0971, s0.acc: 96.7002, s0.loss_bbox: 0.0506, s1.loss_cls: 0.0473, s1.acc: 96.6514, s1.loss_bbox: 0.0461, s2.loss_cls: 0.0218, s2.acc: 96.7511, s2.loss_bbox: 0.0252, loss: 0.3276
+2022-03-30 17:20:58,018 - mmdet - INFO - Epoch [18][150/212]	lr: 2.722e-04, eta: 1:38:38, time: 1.588, data_time: 0.022, memory: 28892, loss_rpn_cls: 0.0262, loss_rpn_bbox: 0.0123, s0.loss_cls: 0.0959, s0.acc: 96.6025, s0.loss_bbox: 0.0471, s1.loss_cls: 0.0481, s1.acc: 96.4905, s1.loss_bbox: 0.0457, s2.loss_cls: 0.0229, s2.acc: 96.6370, s2.loss_bbox: 0.0255, loss: 0.3237
+2022-03-30 17:22:16,988 - mmdet - INFO - Epoch [18][200/212]	lr: 2.722e-04, eta: 1:37:24, time: 1.579, data_time: 0.022, memory: 28892, loss_rpn_cls: 0.0272, loss_rpn_bbox: 0.0137, s0.loss_cls: 0.0981, s0.acc: 96.6060, s0.loss_bbox: 0.0479, s1.loss_cls: 0.0483, s1.acc: 96.5362, s1.loss_bbox: 0.0461, s2.loss_cls: 0.0221, s2.acc: 96.7001, s2.loss_bbox: 0.0255, loss: 0.3288
+2022-03-30 17:22:36,539 - mmdet - INFO - Saving checkpoint at 18 epochs
+2022-03-30 17:23:20,347 - mmdet - INFO - Evaluating bbox...
+2022-03-30 17:23:21,343 - mmdet - INFO - 
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.217
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=1000 ] = 0.316
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=1000 ] = 0.233
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.043
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.082
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.287
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.443
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=300 ] = 0.443
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=1000 ] = 0.443
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.167
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.341
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.503
+
+2022-03-30 17:23:21,345 - mmdet - INFO - 
++---------------+-------+
+| category      | AP    |
++---------------+-------+
+| General trash | 0.217 |
++---------------+-------+
+2022-03-30 17:23:21,355 - mmdet - INFO - Exp name: cascade_rcnn_swin-s_single_target.py
+2022-03-30 17:23:21,356 - mmdet - INFO - Epoch(val) [18][412]	bbox_mAP: 0.2170, bbox_mAP_50: 0.3160, bbox_mAP_75: 0.2330, bbox_mAP_s: 0.0430, bbox_mAP_m: 0.0820, bbox_mAP_l: 0.2870, bbox_mAP_copypaste: 0.217 0.316 0.233 0.043 0.082 0.287
+2022-03-30 17:24:43,327 - mmdet - INFO - Epoch [19][50/212]	lr: 2.505e-04, eta: 1:35:37, time: 1.639, data_time: 0.083, memory: 28892, loss_rpn_cls: 0.0238, loss_rpn_bbox: 0.0141, s0.loss_cls: 0.0873, s0.acc: 96.8857, s0.loss_bbox: 0.0424, s1.loss_cls: 0.0442, s1.acc: 96.8075, s1.loss_bbox: 0.0436, s2.loss_cls: 0.0209, s2.acc: 96.9649, s2.loss_bbox: 0.0262, loss: 0.3024
+2022-03-30 17:26:02,341 - mmdet - INFO - Epoch [19][100/212]	lr: 2.505e-04, eta: 1:34:24, time: 1.580, data_time: 0.022, memory: 28892, loss_rpn_cls: 0.0206, loss_rpn_bbox: 0.0123, s0.loss_cls: 0.0908, s0.acc: 96.7437, s0.loss_bbox: 0.0467, s1.loss_cls: 0.0467, s1.acc: 96.6136, s1.loss_bbox: 0.0476, s2.loss_cls: 0.0224, s2.acc: 96.6563, s2.loss_bbox: 0.0273, loss: 0.3144
+2022-03-30 17:27:20,845 - mmdet - INFO - Epoch [19][150/212]	lr: 2.505e-04, eta: 1:33:10, time: 1.570, data_time: 0.021, memory: 28892, loss_rpn_cls: 0.0221, loss_rpn_bbox: 0.0124, s0.loss_cls: 0.0940, s0.acc: 96.6709, s0.loss_bbox: 0.0484, s1.loss_cls: 0.0480, s1.acc: 96.4717, s1.loss_bbox: 0.0497, s2.loss_cls: 0.0224, s2.acc: 96.7124, s2.loss_bbox: 0.0277, loss: 0.3245
+2022-03-30 17:28:40,658 - mmdet - INFO - Epoch [19][200/212]	lr: 2.505e-04, eta: 1:31:57, time: 1.596, data_time: 0.023, memory: 28892, loss_rpn_cls: 0.0264, loss_rpn_bbox: 0.0133, s0.loss_cls: 0.0948, s0.acc: 96.7969, s0.loss_bbox: 0.0459, s1.loss_cls: 0.0468, s1.acc: 96.7656, s1.loss_bbox: 0.0442, s2.loss_cls: 0.0213, s2.acc: 96.8759, s2.loss_bbox: 0.0252, loss: 0.3179
+2022-03-30 17:28:59,845 - mmdet - INFO - Saving checkpoint at 19 epochs
+2022-03-30 17:29:44,046 - mmdet - INFO - Evaluating bbox...
+2022-03-30 17:29:45,305 - mmdet - INFO - 
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.220
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=1000 ] = 0.323
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=1000 ] = 0.238
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.022
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.077
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.290
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.457
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=300 ] = 0.457
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=1000 ] = 0.457
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.144
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.367
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.512
+
+2022-03-30 17:29:45,306 - mmdet - INFO - 
++---------------+-------+
+| category      | AP    |
++---------------+-------+
+| General trash | 0.220 |
++---------------+-------+
+2022-03-30 17:29:45,318 - mmdet - INFO - Exp name: cascade_rcnn_swin-s_single_target.py
+2022-03-30 17:29:45,318 - mmdet - INFO - Epoch(val) [19][412]	bbox_mAP: 0.2200, bbox_mAP_50: 0.3230, bbox_mAP_75: 0.2380, bbox_mAP_s: 0.0220, bbox_mAP_m: 0.0770, bbox_mAP_l: 0.2900, bbox_mAP_copypaste: 0.220 0.323 0.238 0.022 0.077 0.290
+2022-03-30 17:31:08,286 - mmdet - INFO - Epoch [20][50/212]	lr: 2.288e-04, eta: 1:30:12, time: 1.659, data_time: 0.084, memory: 28892, loss_rpn_cls: 0.0182, loss_rpn_bbox: 0.0111, s0.loss_cls: 0.0827, s0.acc: 97.0898, s0.loss_bbox: 0.0407, s1.loss_cls: 0.0420, s1.acc: 97.0201, s1.loss_bbox: 0.0427, s2.loss_cls: 0.0200, s2.acc: 96.9621, s2.loss_bbox: 0.0264, loss: 0.2838
+2022-03-30 17:32:28,067 - mmdet - INFO - Epoch [20][100/212]	lr: 2.288e-04, eta: 1:28:59, time: 1.596, data_time: 0.022, memory: 28892, loss_rpn_cls: 0.0219, loss_rpn_bbox: 0.0134, s0.loss_cls: 0.0948, s0.acc: 96.6289, s0.loss_bbox: 0.0501, s1.loss_cls: 0.0471, s1.acc: 96.5860, s1.loss_bbox: 0.0507, s2.loss_cls: 0.0221, s2.acc: 96.7059, s2.loss_bbox: 0.0289, loss: 0.3290
+2022-03-30 17:33:47,366 - mmdet - INFO - Epoch [20][150/212]	lr: 2.288e-04, eta: 1:27:45, time: 1.586, data_time: 0.023, memory: 28892, loss_rpn_cls: 0.0256, loss_rpn_bbox: 0.0150, s0.loss_cls: 0.0921, s0.acc: 96.7363, s0.loss_bbox: 0.0479, s1.loss_cls: 0.0467, s1.acc: 96.5776, s1.loss_bbox: 0.0481, s2.loss_cls: 0.0221, s2.acc: 96.7257, s2.loss_bbox: 0.0280, loss: 0.3254
+2022-03-30 17:35:08,597 - mmdet - INFO - Epoch [20][200/212]	lr: 2.288e-04, eta: 1:26:33, time: 1.625, data_time: 0.022, memory: 28892, loss_rpn_cls: 0.0187, loss_rpn_bbox: 0.0123, s0.loss_cls: 0.0851, s0.acc: 96.9966, s0.loss_bbox: 0.0420, s1.loss_cls: 0.0432, s1.acc: 96.8755, s1.loss_bbox: 0.0431, s2.loss_cls: 0.0205, s2.acc: 96.9403, s2.loss_bbox: 0.0249, loss: 0.2898
+2022-03-30 17:35:27,747 - mmdet - INFO - Saving checkpoint at 20 epochs
+2022-03-30 17:36:12,042 - mmdet - INFO - Evaluating bbox...
+2022-03-30 17:36:12,915 - mmdet - INFO - 
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.214
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=1000 ] = 0.310
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=1000 ] = 0.230
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.010
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.084
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.286
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.426
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=300 ] = 0.426
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=1000 ] = 0.426
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.150
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.308
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.493
+
+2022-03-30 17:36:12,916 - mmdet - INFO - 
++---------------+-------+
+| category      | AP    |
++---------------+-------+
+| General trash | 0.214 |
++---------------+-------+
+2022-03-30 17:36:12,924 - mmdet - INFO - Exp name: cascade_rcnn_swin-s_single_target.py
+2022-03-30 17:36:12,924 - mmdet - INFO - Epoch(val) [20][412]	bbox_mAP: 0.2140, bbox_mAP_50: 0.3100, bbox_mAP_75: 0.2300, bbox_mAP_s: 0.0100, bbox_mAP_m: 0.0840, bbox_mAP_l: 0.2860, bbox_mAP_copypaste: 0.214 0.310 0.230 0.010 0.084 0.286
+2022-03-30 17:37:36,209 - mmdet - INFO - Epoch [21][50/212]	lr: 2.072e-04, eta: 1:24:50, time: 1.665, data_time: 0.083, memory: 28892, loss_rpn_cls: 0.0181, loss_rpn_bbox: 0.0117, s0.loss_cls: 0.0870, s0.acc: 96.9009, s0.loss_bbox: 0.0465, s1.loss_cls: 0.0422, s1.acc: 96.8975, s1.loss_bbox: 0.0480, s2.loss_cls: 0.0198, s2.acc: 96.9377, s2.loss_bbox: 0.0287, loss: 0.3020
+2022-03-30 17:38:56,722 - mmdet - INFO - Epoch [21][100/212]	lr: 2.072e-04, eta: 1:23:37, time: 1.610, data_time: 0.022, memory: 28892, loss_rpn_cls: 0.0208, loss_rpn_bbox: 0.0128, s0.loss_cls: 0.0851, s0.acc: 96.9985, s0.loss_bbox: 0.0437, s1.loss_cls: 0.0416, s1.acc: 97.0456, s1.loss_bbox: 0.0433, s2.loss_cls: 0.0196, s2.acc: 97.1170, s2.loss_bbox: 0.0273, loss: 0.2942
+2022-03-30 17:40:15,148 - mmdet - INFO - Epoch [21][150/212]	lr: 2.072e-04, eta: 1:22:22, time: 1.568, data_time: 0.021, memory: 28892, loss_rpn_cls: 0.0193, loss_rpn_bbox: 0.0124, s0.loss_cls: 0.0878, s0.acc: 96.9038, s0.loss_bbox: 0.0445, s1.loss_cls: 0.0442, s1.acc: 96.7004, s1.loss_bbox: 0.0468, s2.loss_cls: 0.0214, s2.acc: 96.7288, s2.loss_bbox: 0.0280, loss: 0.3044
+2022-03-30 17:41:34,150 - mmdet - INFO - Epoch [21][200/212]	lr: 2.072e-04, eta: 1:21:08, time: 1.580, data_time: 0.022, memory: 28892, loss_rpn_cls: 0.0219, loss_rpn_bbox: 0.0124, s0.loss_cls: 0.0813, s0.acc: 97.1455, s0.loss_bbox: 0.0418, s1.loss_cls: 0.0392, s1.acc: 97.1356, s1.loss_bbox: 0.0421, s2.loss_cls: 0.0187, s2.acc: 97.2301, s2.loss_bbox: 0.0268, loss: 0.2842
+2022-03-30 17:41:53,080 - mmdet - INFO - Saving checkpoint at 21 epochs
+2022-03-30 17:42:37,038 - mmdet - INFO - Evaluating bbox...
+2022-03-30 17:42:37,770 - mmdet - INFO - 
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.235
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=1000 ] = 0.332
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=1000 ] = 0.253
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.006
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.088
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.311
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.425
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=300 ] = 0.425
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=1000 ] = 0.425
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.128
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.286
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.503
+
+2022-03-30 17:42:37,771 - mmdet - INFO - 
++---------------+-------+
+| category      | AP    |
++---------------+-------+
+| General trash | 0.235 |
++---------------+-------+
+2022-03-30 17:42:37,780 - mmdet - INFO - Exp name: cascade_rcnn_swin-s_single_target.py
+2022-03-30 17:42:37,780 - mmdet - INFO - Epoch(val) [21][412]	bbox_mAP: 0.2350, bbox_mAP_50: 0.3320, bbox_mAP_75: 0.2530, bbox_mAP_s: 0.0060, bbox_mAP_m: 0.0880, bbox_mAP_l: 0.3110, bbox_mAP_copypaste: 0.235 0.332 0.253 0.006 0.088 0.311
+2022-03-30 17:43:59,496 - mmdet - INFO - Epoch [22][50/212]	lr: 1.859e-04, eta: 1:19:24, time: 1.634, data_time: 0.083, memory: 28892, loss_rpn_cls: 0.0171, loss_rpn_bbox: 0.0104, s0.loss_cls: 0.0765, s0.acc: 97.2500, s0.loss_bbox: 0.0403, s1.loss_cls: 0.0389, s1.acc: 97.1621, s1.loss_bbox: 0.0430, s2.loss_cls: 0.0183, s2.acc: 97.2569, s2.loss_bbox: 0.0268, loss: 0.2713
+2022-03-30 17:45:19,388 - mmdet - INFO - Epoch [22][100/212]	lr: 1.859e-04, eta: 1:18:11, time: 1.598, data_time: 0.022, memory: 28892, loss_rpn_cls: 0.0177, loss_rpn_bbox: 0.0132, s0.loss_cls: 0.0913, s0.acc: 96.7773, s0.loss_bbox: 0.0498, s1.loss_cls: 0.0457, s1.acc: 96.6802, s1.loss_bbox: 0.0490, s2.loss_cls: 0.0215, s2.acc: 96.8311, s2.loss_bbox: 0.0300, loss: 0.3182
+2022-03-30 17:46:38,624 - mmdet - INFO - Epoch [22][150/212]	lr: 1.859e-04, eta: 1:16:57, time: 1.585, data_time: 0.022, memory: 28892, loss_rpn_cls: 0.0186, loss_rpn_bbox: 0.0100, s0.loss_cls: 0.0820, s0.acc: 97.1982, s0.loss_bbox: 0.0395, s1.loss_cls: 0.0408, s1.acc: 97.1686, s1.loss_bbox: 0.0417, s2.loss_cls: 0.0190, s2.acc: 97.2490, s2.loss_bbox: 0.0259, loss: 0.2776
+2022-03-30 17:47:57,622 - mmdet - INFO - Epoch [22][200/212]	lr: 1.859e-04, eta: 1:15:42, time: 1.580, data_time: 0.022, memory: 28892, loss_rpn_cls: 0.0163, loss_rpn_bbox: 0.0122, s0.loss_cls: 0.0817, s0.acc: 97.0576, s0.loss_bbox: 0.0453, s1.loss_cls: 0.0395, s1.acc: 97.1512, s1.loss_bbox: 0.0452, s2.loss_cls: 0.0189, s2.acc: 97.2034, s2.loss_bbox: 0.0277, loss: 0.2868
+2022-03-30 17:48:16,856 - mmdet - INFO - Saving checkpoint at 22 epochs
+2022-03-30 17:49:01,146 - mmdet - INFO - Evaluating bbox...
+2022-03-30 17:49:01,890 - mmdet - INFO - 
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.238
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=1000 ] = 0.336
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=1000 ] = 0.259
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.041
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.113
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.306
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.441
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=300 ] = 0.441
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=1000 ] = 0.441
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.239
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.350
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.492
+
+2022-03-30 17:49:01,891 - mmdet - INFO - 
++---------------+-------+
+| category      | AP    |
++---------------+-------+
+| General trash | 0.238 |
++---------------+-------+
+2022-03-30 17:49:01,899 - mmdet - INFO - Exp name: cascade_rcnn_swin-s_single_target.py
+2022-03-30 17:49:01,900 - mmdet - INFO - Epoch(val) [22][412]	bbox_mAP: 0.2380, bbox_mAP_50: 0.3360, bbox_mAP_75: 0.2590, bbox_mAP_s: 0.0410, bbox_mAP_m: 0.1130, bbox_mAP_l: 0.3060, bbox_mAP_copypaste: 0.238 0.336 0.259 0.041 0.113 0.306
+2022-03-30 17:50:23,797 - mmdet - INFO - Epoch [23][50/212]	lr: 1.652e-04, eta: 1:14:00, time: 1.637, data_time: 0.083, memory: 28892, loss_rpn_cls: 0.0161, loss_rpn_bbox: 0.0106, s0.loss_cls: 0.0738, s0.acc: 97.3823, s0.loss_bbox: 0.0414, s1.loss_cls: 0.0360, s1.acc: 97.3728, s1.loss_bbox: 0.0434, s2.loss_cls: 0.0175, s2.acc: 97.3710, s2.loss_bbox: 0.0291, loss: 0.2679
+2022-03-30 17:51:42,918 - mmdet - INFO - Epoch [23][100/212]	lr: 1.652e-04, eta: 1:12:46, time: 1.582, data_time: 0.022, memory: 28892, loss_rpn_cls: 0.0165, loss_rpn_bbox: 0.0116, s0.loss_cls: 0.0775, s0.acc: 97.1885, s0.loss_bbox: 0.0430, s1.loss_cls: 0.0396, s1.acc: 96.9520, s1.loss_bbox: 0.0479, s2.loss_cls: 0.0189, s2.acc: 97.0768, s2.loss_bbox: 0.0289, loss: 0.2838
+2022-03-30 17:53:02,573 - mmdet - INFO - Epoch [23][150/212]	lr: 1.652e-04, eta: 1:11:32, time: 1.593, data_time: 0.023, memory: 28892, loss_rpn_cls: 0.0162, loss_rpn_bbox: 0.0100, s0.loss_cls: 0.0836, s0.acc: 96.8657, s0.loss_bbox: 0.0452, s1.loss_cls: 0.0422, s1.acc: 96.7764, s1.loss_bbox: 0.0499, s2.loss_cls: 0.0204, s2.acc: 96.8734, s2.loss_bbox: 0.0320, loss: 0.2995
+2022-03-30 17:54:21,623 - mmdet - INFO - Epoch [23][200/212]	lr: 1.652e-04, eta: 1:10:17, time: 1.581, data_time: 0.022, memory: 28892, loss_rpn_cls: 0.0155, loss_rpn_bbox: 0.0112, s0.loss_cls: 0.0771, s0.acc: 97.2925, s0.loss_bbox: 0.0423, s1.loss_cls: 0.0375, s1.acc: 97.3357, s1.loss_bbox: 0.0437, s2.loss_cls: 0.0178, s2.acc: 97.4076, s2.loss_bbox: 0.0261, loss: 0.2711
+2022-03-30 17:54:40,553 - mmdet - INFO - Saving checkpoint at 23 epochs
+2022-03-30 17:55:24,870 - mmdet - INFO - Evaluating bbox...
+2022-03-30 17:55:25,845 - mmdet - INFO - 
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.224
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=1000 ] = 0.325
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=1000 ] = 0.240
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.005
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.094
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.302
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.449
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=300 ] = 0.449
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=1000 ] = 0.449
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.206
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.332
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.514
+
+2022-03-30 17:55:25,846 - mmdet - INFO - 
++---------------+-------+
+| category      | AP    |
++---------------+-------+
+| General trash | 0.224 |
++---------------+-------+
+2022-03-30 17:55:25,856 - mmdet - INFO - Exp name: cascade_rcnn_swin-s_single_target.py
+2022-03-30 17:55:25,856 - mmdet - INFO - Epoch(val) [23][412]	bbox_mAP: 0.2240, bbox_mAP_50: 0.3250, bbox_mAP_75: 0.2400, bbox_mAP_s: 0.0050, bbox_mAP_m: 0.0940, bbox_mAP_l: 0.3020, bbox_mAP_copypaste: 0.224 0.325 0.240 0.005 0.094 0.302
+2022-03-30 17:56:47,454 - mmdet - INFO - Epoch [24][50/212]	lr: 1.451e-04, eta: 1:08:36, time: 1.631, data_time: 0.083, memory: 28892, loss_rpn_cls: 0.0149, loss_rpn_bbox: 0.0104, s0.loss_cls: 0.0795, s0.acc: 97.2280, s0.loss_bbox: 0.0421, s1.loss_cls: 0.0390, s1.acc: 97.2032, s1.loss_bbox: 0.0441, s2.loss_cls: 0.0186, s2.acc: 97.2066, s2.loss_bbox: 0.0281, loss: 0.2767
+2022-03-30 17:58:06,155 - mmdet - INFO - Epoch [24][100/212]	lr: 1.451e-04, eta: 1:07:21, time: 1.574, data_time: 0.022, memory: 28892, loss_rpn_cls: 0.0161, loss_rpn_bbox: 0.0121, s0.loss_cls: 0.0819, s0.acc: 97.1475, s0.loss_bbox: 0.0438, s1.loss_cls: 0.0383, s1.acc: 97.3448, s1.loss_bbox: 0.0475, s2.loss_cls: 0.0170, s2.acc: 97.5910, s2.loss_bbox: 0.0293, loss: 0.2859
+2022-03-30 17:59:25,029 - mmdet - INFO - Epoch [24][150/212]	lr: 1.451e-04, eta: 1:06:06, time: 1.577, data_time: 0.022, memory: 28892, loss_rpn_cls: 0.0152, loss_rpn_bbox: 0.0103, s0.loss_cls: 0.0707, s0.acc: 97.4604, s0.loss_bbox: 0.0380, s1.loss_cls: 0.0349, s1.acc: 97.4659, s1.loss_bbox: 0.0423, s2.loss_cls: 0.0170, s2.acc: 97.3891, s2.loss_bbox: 0.0271, loss: 0.2554
+2022-03-30 18:00:44,804 - mmdet - INFO - Epoch [24][200/212]	lr: 1.451e-04, eta: 1:04:52, time: 1.595, data_time: 0.022, memory: 28892, loss_rpn_cls: 0.0181, loss_rpn_bbox: 0.0121, s0.loss_cls: 0.0702, s0.acc: 97.5249, s0.loss_bbox: 0.0383, s1.loss_cls: 0.0337, s1.acc: 97.5554, s1.loss_bbox: 0.0400, s2.loss_cls: 0.0163, s2.acc: 97.6052, s2.loss_bbox: 0.0244, loss: 0.2532
+2022-03-30 18:01:03,624 - mmdet - INFO - Saving checkpoint at 24 epochs
+2022-03-30 18:01:48,812 - mmdet - INFO - Evaluating bbox...
+2022-03-30 18:01:49,425 - mmdet - INFO - 
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.235
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=1000 ] = 0.334
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=1000 ] = 0.257
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.005
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.094
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.309
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.413
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=300 ] = 0.413
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=1000 ] = 0.413
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.078
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.266
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.497
+
+2022-03-30 18:01:49,426 - mmdet - INFO - 
++---------------+-------+
+| category      | AP    |
++---------------+-------+
+| General trash | 0.235 |
++---------------+-------+
+2022-03-30 18:01:49,450 - mmdet - INFO - Exp name: cascade_rcnn_swin-s_single_target.py
+2022-03-30 18:01:49,450 - mmdet - INFO - Epoch(val) [24][412]	bbox_mAP: 0.2350, bbox_mAP_50: 0.3340, bbox_mAP_75: 0.2570, bbox_mAP_s: 0.0050, bbox_mAP_m: 0.0940, bbox_mAP_l: 0.3090, bbox_mAP_copypaste: 0.235 0.334 0.257 0.005 0.094 0.309
+2022-03-30 18:03:11,978 - mmdet - INFO - Epoch [25][50/212]	lr: 1.258e-04, eta: 1:03:12, time: 1.650, data_time: 0.086, memory: 28892, loss_rpn_cls: 0.0129, loss_rpn_bbox: 0.0094, s0.loss_cls: 0.0734, s0.acc: 97.3291, s0.loss_bbox: 0.0392, s1.loss_cls: 0.0362, s1.acc: 97.3502, s1.loss_bbox: 0.0442, s2.loss_cls: 0.0175, s2.acc: 97.3639, s2.loss_bbox: 0.0288, loss: 0.2614
+2022-03-30 18:04:31,712 - mmdet - INFO - Epoch [25][100/212]	lr: 1.258e-04, eta: 1:01:58, time: 1.595, data_time: 0.022, memory: 28892, loss_rpn_cls: 0.0139, loss_rpn_bbox: 0.0096, s0.loss_cls: 0.0781, s0.acc: 97.1924, s0.loss_bbox: 0.0444, s1.loss_cls: 0.0380, s1.acc: 97.2003, s1.loss_bbox: 0.0465, s2.loss_cls: 0.0183, s2.acc: 97.2511, s2.loss_bbox: 0.0286, loss: 0.2776
+2022-03-30 18:05:50,052 - mmdet - INFO - Epoch [25][150/212]	lr: 1.258e-04, eta: 1:00:43, time: 1.567, data_time: 0.022, memory: 28892, loss_rpn_cls: 0.0132, loss_rpn_bbox: 0.0100, s0.loss_cls: 0.0669, s0.acc: 97.6265, s0.loss_bbox: 0.0342, s1.loss_cls: 0.0328, s1.acc: 97.6309, s1.loss_bbox: 0.0374, s2.loss_cls: 0.0159, s2.acc: 97.6301, s2.loss_bbox: 0.0251, loss: 0.2355
+2022-03-30 18:07:09,240 - mmdet - INFO - Epoch [25][200/212]	lr: 1.258e-04, eta: 0:59:28, time: 1.584, data_time: 0.023, memory: 28892, loss_rpn_cls: 0.0141, loss_rpn_bbox: 0.0103, s0.loss_cls: 0.0746, s0.acc: 97.2866, s0.loss_bbox: 0.0417, s1.loss_cls: 0.0364, s1.acc: 97.3111, s1.loss_bbox: 0.0455, s2.loss_cls: 0.0173, s2.acc: 97.4067, s2.loss_bbox: 0.0303, loss: 0.2702
+2022-03-30 18:07:28,507 - mmdet - INFO - Saving checkpoint at 25 epochs
+2022-03-30 18:08:12,776 - mmdet - INFO - Evaluating bbox...
+2022-03-30 18:08:13,448 - mmdet - INFO - 
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.237
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=1000 ] = 0.337
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=1000 ] = 0.255
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.002
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.096
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.311
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.411
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=300 ] = 0.411
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=1000 ] = 0.411
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.039
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.286
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.485
+
+2022-03-30 18:08:13,449 - mmdet - INFO - 
++---------------+-------+
+| category      | AP    |
++---------------+-------+
+| General trash | 0.237 |
++---------------+-------+
+2022-03-30 18:08:13,458 - mmdet - INFO - Exp name: cascade_rcnn_swin-s_single_target.py
+2022-03-30 18:08:13,458 - mmdet - INFO - Epoch(val) [25][412]	bbox_mAP: 0.2370, bbox_mAP_50: 0.3370, bbox_mAP_75: 0.2550, bbox_mAP_s: 0.0020, bbox_mAP_m: 0.0960, bbox_mAP_l: 0.3110, bbox_mAP_copypaste: 0.237 0.337 0.255 0.002 0.096 0.311
+2022-03-30 18:09:35,527 - mmdet - INFO - Epoch [26][50/212]	lr: 1.074e-04, eta: 0:57:48, time: 1.641, data_time: 0.083, memory: 28892, loss_rpn_cls: 0.0137, loss_rpn_bbox: 0.0091, s0.loss_cls: 0.0665, s0.acc: 97.6265, s0.loss_bbox: 0.0367, s1.loss_cls: 0.0323, s1.acc: 97.6786, s1.loss_bbox: 0.0407, s2.loss_cls: 0.0158, s2.acc: 97.6597, s2.loss_bbox: 0.0253, loss: 0.2401
+2022-03-30 18:10:54,536 - mmdet - INFO - Epoch [26][100/212]	lr: 1.074e-04, eta: 0:56:33, time: 1.580, data_time: 0.023, memory: 28892, loss_rpn_cls: 0.0124, loss_rpn_bbox: 0.0112, s0.loss_cls: 0.0678, s0.acc: 97.5532, s0.loss_bbox: 0.0388, s1.loss_cls: 0.0324, s1.acc: 97.6500, s1.loss_bbox: 0.0424, s2.loss_cls: 0.0155, s2.acc: 97.7172, s2.loss_bbox: 0.0281, loss: 0.2487
+2022-03-30 18:12:13,822 - mmdet - INFO - Epoch [26][150/212]	lr: 1.074e-04, eta: 0:55:19, time: 1.586, data_time: 0.022, memory: 28892, loss_rpn_cls: 0.0145, loss_rpn_bbox: 0.0101, s0.loss_cls: 0.0675, s0.acc: 97.5083, s0.loss_bbox: 0.0388, s1.loss_cls: 0.0319, s1.acc: 97.6566, s1.loss_bbox: 0.0423, s2.loss_cls: 0.0153, s2.acc: 97.6852, s2.loss_bbox: 0.0278, loss: 0.2483
+2022-03-30 18:13:32,327 - mmdet - INFO - Epoch [26][200/212]	lr: 1.074e-04, eta: 0:54:04, time: 1.570, data_time: 0.022, memory: 28892, loss_rpn_cls: 0.0139, loss_rpn_bbox: 0.0110, s0.loss_cls: 0.0687, s0.acc: 97.5327, s0.loss_bbox: 0.0379, s1.loss_cls: 0.0336, s1.acc: 97.5820, s1.loss_bbox: 0.0411, s2.loss_cls: 0.0161, s2.acc: 97.5979, s2.loss_bbox: 0.0268, loss: 0.2491
+2022-03-30 18:13:50,958 - mmdet - INFO - Saving checkpoint at 26 epochs
+2022-03-30 18:14:35,603 - mmdet - INFO - Evaluating bbox...
+2022-03-30 18:14:36,192 - mmdet - INFO - 
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.241
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=1000 ] = 0.346
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=1000 ] = 0.258
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.006
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.092
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.318
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.419
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=300 ] = 0.419
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=1000 ] = 0.419
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.133
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.286
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.493
+
+2022-03-30 18:14:36,192 - mmdet - INFO - 
++---------------+-------+
+| category      | AP    |
++---------------+-------+
+| General trash | 0.241 |
++---------------+-------+
+2022-03-30 18:14:36,198 - mmdet - INFO - Exp name: cascade_rcnn_swin-s_single_target.py
+2022-03-30 18:14:36,198 - mmdet - INFO - Epoch(val) [26][412]	bbox_mAP: 0.2410, bbox_mAP_50: 0.3460, bbox_mAP_75: 0.2580, bbox_mAP_s: 0.0060, bbox_mAP_m: 0.0920, bbox_mAP_l: 0.3180, bbox_mAP_copypaste: 0.241 0.346 0.258 0.006 0.092 0.318
+2022-03-30 18:15:57,782 - mmdet - INFO - Epoch [27][50/212]	lr: 9.012e-05, eta: 0:52:24, time: 1.631, data_time: 0.083, memory: 28892, loss_rpn_cls: 0.0114, loss_rpn_bbox: 0.0099, s0.loss_cls: 0.0636, s0.acc: 97.6890, s0.loss_bbox: 0.0380, s1.loss_cls: 0.0296, s1.acc: 97.8749, s1.loss_bbox: 0.0404, s2.loss_cls: 0.0144, s2.acc: 97.8861, s2.loss_bbox: 0.0271, loss: 0.2343
+2022-03-30 18:17:16,672 - mmdet - INFO - Epoch [27][100/212]	lr: 9.012e-05, eta: 0:51:10, time: 1.578, data_time: 0.022, memory: 28892, loss_rpn_cls: 0.0153, loss_rpn_bbox: 0.0114, s0.loss_cls: 0.0662, s0.acc: 97.5786, s0.loss_bbox: 0.0379, s1.loss_cls: 0.0323, s1.acc: 97.5885, s1.loss_bbox: 0.0422, s2.loss_cls: 0.0155, s2.acc: 97.6242, s2.loss_bbox: 0.0278, loss: 0.2486
+2022-03-30 18:18:34,868 - mmdet - INFO - Epoch [27][150/212]	lr: 9.012e-05, eta: 0:49:54, time: 1.564, data_time: 0.022, memory: 28892, loss_rpn_cls: 0.0111, loss_rpn_bbox: 0.0089, s0.loss_cls: 0.0584, s0.acc: 97.9512, s0.loss_bbox: 0.0337, s1.loss_cls: 0.0275, s1.acc: 98.0622, s1.loss_bbox: 0.0374, s2.loss_cls: 0.0127, s2.acc: 98.1963, s2.loss_bbox: 0.0239, loss: 0.2136
+2022-03-30 18:19:53,377 - mmdet - INFO - Epoch [27][200/212]	lr: 9.012e-05, eta: 0:48:39, time: 1.570, data_time: 0.022, memory: 28892, loss_rpn_cls: 0.0119, loss_rpn_bbox: 0.0084, s0.loss_cls: 0.0623, s0.acc: 97.6758, s0.loss_bbox: 0.0340, s1.loss_cls: 0.0298, s1.acc: 97.7452, s1.loss_bbox: 0.0392, s2.loss_cls: 0.0144, s2.acc: 97.7599, s2.loss_bbox: 0.0264, loss: 0.2265
+2022-03-30 18:20:12,361 - mmdet - INFO - Saving checkpoint at 27 epochs
+2022-03-30 18:20:56,666 - mmdet - INFO - Evaluating bbox...
+2022-03-30 18:20:57,191 - mmdet - INFO - 
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.223
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=1000 ] = 0.323
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=1000 ] = 0.242
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.008
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.089
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.295
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.403
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=300 ] = 0.403
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=1000 ] = 0.403
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.106
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.288
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.470
+
+2022-03-30 18:20:57,191 - mmdet - INFO - 
++---------------+-------+
+| category      | AP    |
++---------------+-------+
+| General trash | 0.223 |
++---------------+-------+
+2022-03-30 18:20:57,198 - mmdet - INFO - Exp name: cascade_rcnn_swin-s_single_target.py
+2022-03-30 18:20:57,198 - mmdet - INFO - Epoch(val) [27][412]	bbox_mAP: 0.2230, bbox_mAP_50: 0.3230, bbox_mAP_75: 0.2420, bbox_mAP_s: 0.0080, bbox_mAP_m: 0.0890, bbox_mAP_l: 0.2950, bbox_mAP_copypaste: 0.223 0.323 0.242 0.008 0.089 0.295
+2022-03-30 18:22:19,102 - mmdet - INFO - Epoch [28][50/212]	lr: 7.408e-05, eta: 0:47:01, time: 1.638, data_time: 0.083, memory: 28892, loss_rpn_cls: 0.0103, loss_rpn_bbox: 0.0091, s0.loss_cls: 0.0619, s0.acc: 97.7285, s0.loss_bbox: 0.0371, s1.loss_cls: 0.0290, s1.acc: 97.9224, s1.loss_bbox: 0.0407, s2.loss_cls: 0.0135, s2.acc: 98.0641, s2.loss_bbox: 0.0274, loss: 0.2290
+2022-03-30 18:23:38,157 - mmdet - INFO - Epoch [28][100/212]	lr: 7.408e-05, eta: 0:45:46, time: 1.581, data_time: 0.022, memory: 28892, loss_rpn_cls: 0.0142, loss_rpn_bbox: 0.0086, s0.loss_cls: 0.0638, s0.acc: 97.6758, s0.loss_bbox: 0.0358, s1.loss_cls: 0.0297, s1.acc: 97.8179, s1.loss_bbox: 0.0384, s2.loss_cls: 0.0138, s2.acc: 97.9072, s2.loss_bbox: 0.0250, loss: 0.2294
+2022-03-30 18:24:57,290 - mmdet - INFO - Epoch [28][150/212]	lr: 7.408e-05, eta: 0:44:31, time: 1.583, data_time: 0.022, memory: 28892, loss_rpn_cls: 0.0136, loss_rpn_bbox: 0.0090, s0.loss_cls: 0.0599, s0.acc: 97.8320, s0.loss_bbox: 0.0344, s1.loss_cls: 0.0285, s1.acc: 97.9008, s1.loss_bbox: 0.0388, s2.loss_cls: 0.0136, s2.acc: 97.9734, s2.loss_bbox: 0.0257, loss: 0.2236
+2022-03-30 18:26:16,149 - mmdet - INFO - Epoch [28][200/212]	lr: 7.408e-05, eta: 0:43:16, time: 1.577, data_time: 0.022, memory: 28892, loss_rpn_cls: 0.0127, loss_rpn_bbox: 0.0095, s0.loss_cls: 0.0615, s0.acc: 97.7866, s0.loss_bbox: 0.0362, s1.loss_cls: 0.0289, s1.acc: 97.9327, s1.loss_bbox: 0.0384, s2.loss_cls: 0.0137, s2.acc: 98.0044, s2.loss_bbox: 0.0266, loss: 0.2274
+2022-03-30 18:26:35,058 - mmdet - INFO - Saving checkpoint at 28 epochs
+2022-03-30 18:27:20,022 - mmdet - INFO - Evaluating bbox...
+2022-03-30 18:27:20,436 - mmdet - INFO - 
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.238
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=1000 ] = 0.330
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=1000 ] = 0.256
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.009
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.099
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.313
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.402
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=300 ] = 0.402
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=1000 ] = 0.402
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.106
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.279
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.472
+
+2022-03-30 18:27:20,436 - mmdet - INFO - 
++---------------+-------+
+| category      | AP    |
++---------------+-------+
+| General trash | 0.238 |
++---------------+-------+
+2022-03-30 18:27:20,443 - mmdet - INFO - Exp name: cascade_rcnn_swin-s_single_target.py
+2022-03-30 18:27:20,444 - mmdet - INFO - Epoch(val) [28][412]	bbox_mAP: 0.2380, bbox_mAP_50: 0.3300, bbox_mAP_75: 0.2560, bbox_mAP_s: 0.0090, bbox_mAP_m: 0.0990, bbox_mAP_l: 0.3130, bbox_mAP_copypaste: 0.238 0.330 0.256 0.009 0.099 0.313
+2022-03-30 18:28:42,770 - mmdet - INFO - Epoch [29][50/212]	lr: 5.937e-05, eta: 0:41:38, time: 1.646, data_time: 0.084, memory: 28892, loss_rpn_cls: 0.0096, loss_rpn_bbox: 0.0074, s0.loss_cls: 0.0552, s0.acc: 98.0205, s0.loss_bbox: 0.0295, s1.loss_cls: 0.0260, s1.acc: 98.1171, s1.loss_bbox: 0.0343, s2.loss_cls: 0.0126, s2.acc: 98.1676, s2.loss_bbox: 0.0226, loss: 0.1972
+2022-03-30 18:30:02,020 - mmdet - INFO - Epoch [29][100/212]	lr: 5.937e-05, eta: 0:40:23, time: 1.585, data_time: 0.022, memory: 28892, loss_rpn_cls: 0.0105, loss_rpn_bbox: 0.0093, s0.loss_cls: 0.0634, s0.acc: 97.6699, s0.loss_bbox: 0.0388, s1.loss_cls: 0.0302, s1.acc: 97.7228, s1.loss_bbox: 0.0428, s2.loss_cls: 0.0145, s2.acc: 97.7634, s2.loss_bbox: 0.0286, loss: 0.2382
+2022-03-30 18:31:21,181 - mmdet - INFO - Epoch [29][150/212]	lr: 5.937e-05, eta: 0:39:08, time: 1.583, data_time: 0.022, memory: 28892, loss_rpn_cls: 0.0108, loss_rpn_bbox: 0.0074, s0.loss_cls: 0.0605, s0.acc: 97.7749, s0.loss_bbox: 0.0364, s1.loss_cls: 0.0280, s1.acc: 97.9357, s1.loss_bbox: 0.0415, s2.loss_cls: 0.0137, s2.acc: 97.9634, s2.loss_bbox: 0.0289, loss: 0.2273
+2022-03-30 18:32:40,972 - mmdet - INFO - Epoch [29][200/212]	lr: 5.937e-05, eta: 0:37:53, time: 1.596, data_time: 0.023, memory: 28892, loss_rpn_cls: 0.0117, loss_rpn_bbox: 0.0103, s0.loss_cls: 0.0570, s0.acc: 97.9785, s0.loss_bbox: 0.0329, s1.loss_cls: 0.0271, s1.acc: 98.0679, s1.loss_bbox: 0.0373, s2.loss_cls: 0.0129, s2.acc: 98.1098, s2.loss_bbox: 0.0254, loss: 0.2146
+2022-03-30 18:32:59,851 - mmdet - INFO - Saving checkpoint at 29 epochs
+2022-03-30 18:33:44,371 - mmdet - INFO - Evaluating bbox...
+2022-03-30 18:33:45,059 - mmdet - INFO - 
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.232
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=1000 ] = 0.327
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=1000 ] = 0.247
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.011
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.100
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.307
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.406
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=300 ] = 0.406
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=1000 ] = 0.406
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.156
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.290
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.471
+
+2022-03-30 18:33:45,059 - mmdet - INFO - 
++---------------+-------+
+| category      | AP    |
++---------------+-------+
+| General trash | 0.232 |
++---------------+-------+
+2022-03-30 18:33:45,066 - mmdet - INFO - Exp name: cascade_rcnn_swin-s_single_target.py
+2022-03-30 18:33:45,066 - mmdet - INFO - Epoch(val) [29][412]	bbox_mAP: 0.2320, bbox_mAP_50: 0.3270, bbox_mAP_75: 0.2470, bbox_mAP_s: 0.0110, bbox_mAP_m: 0.1000, bbox_mAP_l: 0.3070, bbox_mAP_copypaste: 0.232 0.327 0.247 0.011 0.100 0.307
+2022-03-30 18:35:06,290 - mmdet - INFO - Epoch [30][50/212]	lr: 4.612e-05, eta: 0:36:16, time: 1.624, data_time: 0.083, memory: 28892, loss_rpn_cls: 0.0130, loss_rpn_bbox: 0.0087, s0.loss_cls: 0.0539, s0.acc: 98.0801, s0.loss_bbox: 0.0311, s1.loss_cls: 0.0242, s1.acc: 98.2887, s1.loss_bbox: 0.0359, s2.loss_cls: 0.0117, s2.acc: 98.3084, s2.loss_bbox: 0.0255, loss: 0.2039
+2022-03-30 18:36:25,948 - mmdet - INFO - Epoch [30][100/212]	lr: 4.612e-05, eta: 0:35:01, time: 1.593, data_time: 0.022, memory: 28892, loss_rpn_cls: 0.0094, loss_rpn_bbox: 0.0082, s0.loss_cls: 0.0518, s0.acc: 98.1377, s0.loss_bbox: 0.0306, s1.loss_cls: 0.0248, s1.acc: 98.1994, s1.loss_bbox: 0.0360, s2.loss_cls: 0.0121, s2.acc: 98.2714, s2.loss_bbox: 0.0246, loss: 0.1975
+2022-03-30 18:37:44,324 - mmdet - INFO - Epoch [30][150/212]	lr: 4.612e-05, eta: 0:33:45, time: 1.567, data_time: 0.023, memory: 28892, loss_rpn_cls: 0.0083, loss_rpn_bbox: 0.0081, s0.loss_cls: 0.0585, s0.acc: 97.8247, s0.loss_bbox: 0.0347, s1.loss_cls: 0.0277, s1.acc: 97.9295, s1.loss_bbox: 0.0421, s2.loss_cls: 0.0136, s2.acc: 97.9469, s2.loss_bbox: 0.0282, loss: 0.2212
+2022-03-30 18:39:02,740 - mmdet - INFO - Epoch [30][200/212]	lr: 4.612e-05, eta: 0:32:30, time: 1.568, data_time: 0.022, memory: 28892, loss_rpn_cls: 0.0107, loss_rpn_bbox: 0.0090, s0.loss_cls: 0.0573, s0.acc: 97.9111, s0.loss_bbox: 0.0355, s1.loss_cls: 0.0262, s1.acc: 98.0510, s1.loss_bbox: 0.0387, s2.loss_cls: 0.0129, s2.acc: 98.1021, s2.loss_bbox: 0.0263, loss: 0.2167
+2022-03-30 18:39:21,412 - mmdet - INFO - Saving checkpoint at 30 epochs
+2022-03-30 18:40:05,378 - mmdet - INFO - Evaluating bbox...
+2022-03-30 18:40:05,892 - mmdet - INFO - 
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.249
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=1000 ] = 0.358
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=1000 ] = 0.271
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.003
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.108
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.326
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.418
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=300 ] = 0.418
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=1000 ] = 0.418
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.067
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.289
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.494
+
+2022-03-30 18:40:05,893 - mmdet - INFO - 
++---------------+-------+
+| category      | AP    |
++---------------+-------+
+| General trash | 0.249 |
++---------------+-------+
+2022-03-30 18:40:05,899 - mmdet - INFO - Exp name: cascade_rcnn_swin-s_single_target.py
+2022-03-30 18:40:05,899 - mmdet - INFO - Epoch(val) [30][412]	bbox_mAP: 0.2490, bbox_mAP_50: 0.3580, bbox_mAP_75: 0.2710, bbox_mAP_s: 0.0030, bbox_mAP_m: 0.1080, bbox_mAP_l: 0.3260, bbox_mAP_copypaste: 0.249 0.358 0.271 0.003 0.108 0.326
+2022-03-30 18:41:27,447 - mmdet - INFO - Epoch [31][50/212]	lr: 3.443e-05, eta: 0:30:53, time: 1.630, data_time: 0.083, memory: 28892, loss_rpn_cls: 0.0106, loss_rpn_bbox: 0.0084, s0.loss_cls: 0.0584, s0.acc: 97.8828, s0.loss_bbox: 0.0360, s1.loss_cls: 0.0268, s1.acc: 98.0818, s1.loss_bbox: 0.0398, s2.loss_cls: 0.0129, s2.acc: 98.0885, s2.loss_bbox: 0.0275, loss: 0.2203
+2022-03-30 18:42:45,314 - mmdet - INFO - Epoch [31][100/212]	lr: 3.443e-05, eta: 0:29:38, time: 1.557, data_time: 0.022, memory: 28892, loss_rpn_cls: 0.0104, loss_rpn_bbox: 0.0077, s0.loss_cls: 0.0533, s0.acc: 98.0659, s0.loss_bbox: 0.0306, s1.loss_cls: 0.0249, s1.acc: 98.1690, s1.loss_bbox: 0.0348, s2.loss_cls: 0.0122, s2.acc: 98.1948, s2.loss_bbox: 0.0249, loss: 0.1988
+2022-03-30 18:44:03,467 - mmdet - INFO - Epoch [31][150/212]	lr: 3.443e-05, eta: 0:28:22, time: 1.563, data_time: 0.022, memory: 28892, loss_rpn_cls: 0.0110, loss_rpn_bbox: 0.0082, s0.loss_cls: 0.0579, s0.acc: 97.8955, s0.loss_bbox: 0.0349, s1.loss_cls: 0.0265, s1.acc: 98.1131, s1.loss_bbox: 0.0397, s2.loss_cls: 0.0128, s2.acc: 98.0981, s2.loss_bbox: 0.0271, loss: 0.2181
+2022-03-30 18:45:21,680 - mmdet - INFO - Epoch [31][200/212]	lr: 3.443e-05, eta: 0:27:07, time: 1.564, data_time: 0.022, memory: 28892, loss_rpn_cls: 0.0090, loss_rpn_bbox: 0.0085, s0.loss_cls: 0.0521, s0.acc: 98.0679, s0.loss_bbox: 0.0319, s1.loss_cls: 0.0243, s1.acc: 98.1515, s1.loss_bbox: 0.0361, s2.loss_cls: 0.0118, s2.acc: 98.2058, s2.loss_bbox: 0.0240, loss: 0.1978
+2022-03-30 18:45:40,480 - mmdet - INFO - Saving checkpoint at 31 epochs
+2022-03-30 18:46:24,506 - mmdet - INFO - Evaluating bbox...
+2022-03-30 18:46:24,949 - mmdet - INFO - 
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.246
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=1000 ] = 0.345
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=1000 ] = 0.264
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.006
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.101
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.324
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.411
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=300 ] = 0.411
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=1000 ] = 0.411
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.106
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.279
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.487
+
+2022-03-30 18:46:24,949 - mmdet - INFO - 
++---------------+-------+
+| category      | AP    |
++---------------+-------+
+| General trash | 0.246 |
++---------------+-------+
+2022-03-30 18:46:24,955 - mmdet - INFO - Exp name: cascade_rcnn_swin-s_single_target.py
+2022-03-30 18:46:24,955 - mmdet - INFO - Epoch(val) [31][412]	bbox_mAP: 0.2460, bbox_mAP_50: 0.3450, bbox_mAP_75: 0.2640, bbox_mAP_s: 0.0060, bbox_mAP_m: 0.1010, bbox_mAP_l: 0.3240, bbox_mAP_copypaste: 0.246 0.345 0.264 0.006 0.101 0.324
+2022-03-30 18:47:47,241 - mmdet - INFO - Epoch [32][50/212]	lr: 2.438e-05, eta: 0:25:31, time: 1.645, data_time: 0.083, memory: 28892, loss_rpn_cls: 0.0069, loss_rpn_bbox: 0.0075, s0.loss_cls: 0.0524, s0.acc: 98.0771, s0.loss_bbox: 0.0321, s1.loss_cls: 0.0246, s1.acc: 98.1829, s1.loss_bbox: 0.0363, s2.loss_cls: 0.0120, s2.acc: 98.1666, s2.loss_bbox: 0.0259, loss: 0.1976
+2022-03-30 18:49:05,436 - mmdet - INFO - Epoch [32][100/212]	lr: 2.438e-05, eta: 0:24:16, time: 1.564, data_time: 0.022, memory: 28892, loss_rpn_cls: 0.0090, loss_rpn_bbox: 0.0080, s0.loss_cls: 0.0585, s0.acc: 97.8442, s0.loss_bbox: 0.0366, s1.loss_cls: 0.0268, s1.acc: 98.0032, s1.loss_bbox: 0.0408, s2.loss_cls: 0.0129, s2.acc: 98.0978, s2.loss_bbox: 0.0262, loss: 0.2188
+2022-03-30 18:50:24,192 - mmdet - INFO - Epoch [32][150/212]	lr: 2.438e-05, eta: 0:23:00, time: 1.575, data_time: 0.023, memory: 28892, loss_rpn_cls: 0.0088, loss_rpn_bbox: 0.0074, s0.loss_cls: 0.0541, s0.acc: 97.9478, s0.loss_bbox: 0.0312, s1.loss_cls: 0.0254, s1.acc: 98.1061, s1.loss_bbox: 0.0358, s2.loss_cls: 0.0121, s2.acc: 98.1949, s2.loss_bbox: 0.0249, loss: 0.1996
+2022-03-30 18:51:42,725 - mmdet - INFO - Epoch [32][200/212]	lr: 2.438e-05, eta: 0:21:45, time: 1.571, data_time: 0.023, memory: 28892, loss_rpn_cls: 0.0105, loss_rpn_bbox: 0.0089, s0.loss_cls: 0.0573, s0.acc: 97.9243, s0.loss_bbox: 0.0357, s1.loss_cls: 0.0262, s1.acc: 98.1040, s1.loss_bbox: 0.0404, s2.loss_cls: 0.0126, s2.acc: 98.1545, s2.loss_bbox: 0.0266, loss: 0.2183
+2022-03-30 18:52:01,792 - mmdet - INFO - Saving checkpoint at 32 epochs
+2022-03-30 18:52:46,421 - mmdet - INFO - Evaluating bbox...
+2022-03-30 18:52:46,863 - mmdet - INFO - 
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.246
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=1000 ] = 0.345
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=1000 ] = 0.269
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.001
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.102
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.325
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.405
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=300 ] = 0.405
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=1000 ] = 0.405
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.028
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.265
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.487
+
+2022-03-30 18:52:46,864 - mmdet - INFO - 
++---------------+-------+
+| category      | AP    |
++---------------+-------+
+| General trash | 0.246 |
++---------------+-------+
+2022-03-30 18:52:46,873 - mmdet - INFO - Exp name: cascade_rcnn_swin-s_single_target.py
+2022-03-30 18:52:46,873 - mmdet - INFO - Epoch(val) [32][412]	bbox_mAP: 0.2460, bbox_mAP_50: 0.3450, bbox_mAP_75: 0.2690, bbox_mAP_s: 0.0010, bbox_mAP_m: 0.1020, bbox_mAP_l: 0.3250, bbox_mAP_copypaste: 0.246 0.345 0.269 0.001 0.102 0.325
+2022-03-30 18:54:09,642 - mmdet - INFO - Epoch [33][50/212]	lr: 1.605e-05, eta: 0:20:09, time: 1.655, data_time: 0.084, memory: 28892, loss_rpn_cls: 0.0095, loss_rpn_bbox: 0.0081, s0.loss_cls: 0.0523, s0.acc: 98.0879, s0.loss_bbox: 0.0316, s1.loss_cls: 0.0235, s1.acc: 98.2798, s1.loss_bbox: 0.0365, s2.loss_cls: 0.0113, s2.acc: 98.3248, s2.loss_bbox: 0.0248, loss: 0.1975
+2022-03-30 18:55:28,489 - mmdet - INFO - Epoch [33][100/212]	lr: 1.605e-05, eta: 0:18:54, time: 1.577, data_time: 0.022, memory: 28892, loss_rpn_cls: 0.0085, loss_rpn_bbox: 0.0084, s0.loss_cls: 0.0515, s0.acc: 98.0278, s0.loss_bbox: 0.0313, s1.loss_cls: 0.0243, s1.acc: 98.1969, s1.loss_bbox: 0.0365, s2.loss_cls: 0.0117, s2.acc: 98.2817, s2.loss_bbox: 0.0245, loss: 0.1967
+2022-03-30 18:56:46,802 - mmdet - INFO - Epoch [33][150/212]	lr: 1.605e-05, eta: 0:17:38, time: 1.566, data_time: 0.022, memory: 28892, loss_rpn_cls: 0.0093, loss_rpn_bbox: 0.0086, s0.loss_cls: 0.0545, s0.acc: 98.0020, s0.loss_bbox: 0.0357, s1.loss_cls: 0.0249, s1.acc: 98.1893, s1.loss_bbox: 0.0410, s2.loss_cls: 0.0124, s2.acc: 98.1154, s2.loss_bbox: 0.0277, loss: 0.2142
+2022-03-30 18:58:05,772 - mmdet - INFO - Epoch [33][200/212]	lr: 1.605e-05, eta: 0:16:23, time: 1.579, data_time: 0.022, memory: 28892, loss_rpn_cls: 0.0090, loss_rpn_bbox: 0.0076, s0.loss_cls: 0.0549, s0.acc: 97.9648, s0.loss_bbox: 0.0337, s1.loss_cls: 0.0247, s1.acc: 98.1770, s1.loss_bbox: 0.0390, s2.loss_cls: 0.0116, s2.acc: 98.2924, s2.loss_bbox: 0.0264, loss: 0.2070
+2022-03-30 18:58:24,461 - mmdet - INFO - Saving checkpoint at 33 epochs
+2022-03-30 18:59:08,520 - mmdet - INFO - Evaluating bbox...
+2022-03-30 18:59:09,099 - mmdet - INFO - 
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.247
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=1000 ] = 0.345
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=1000 ] = 0.269
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.001
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.102
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.326
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.393
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=300 ] = 0.393
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=1000 ] = 0.393
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.028
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.260
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.471
+
+2022-03-30 18:59:09,100 - mmdet - INFO - 
++---------------+-------+
+| category      | AP    |
++---------------+-------+
+| General trash | 0.247 |
++---------------+-------+
+2022-03-30 18:59:09,106 - mmdet - INFO - Exp name: cascade_rcnn_swin-s_single_target.py
+2022-03-30 18:59:09,106 - mmdet - INFO - Epoch(val) [33][412]	bbox_mAP: 0.2470, bbox_mAP_50: 0.3450, bbox_mAP_75: 0.2690, bbox_mAP_s: 0.0010, bbox_mAP_m: 0.1020, bbox_mAP_l: 0.3260, bbox_mAP_copypaste: 0.247 0.345 0.269 0.001 0.102 0.326
+2022-03-30 19:00:30,614 - mmdet - INFO - Epoch [34][50/212]	lr: 9.502e-06, eta: 0:14:47, time: 1.630, data_time: 0.084, memory: 28892, loss_rpn_cls: 0.0096, loss_rpn_bbox: 0.0080, s0.loss_cls: 0.0617, s0.acc: 97.7842, s0.loss_bbox: 0.0372, s1.loss_cls: 0.0280, s1.acc: 97.9518, s1.loss_bbox: 0.0429, s2.loss_cls: 0.0134, s2.acc: 98.0753, s2.loss_bbox: 0.0277, loss: 0.2286
+2022-03-30 19:01:49,171 - mmdet - INFO - Epoch [34][100/212]	lr: 9.502e-06, eta: 0:13:32, time: 1.571, data_time: 0.022, memory: 28892, loss_rpn_cls: 0.0095, loss_rpn_bbox: 0.0086, s0.loss_cls: 0.0529, s0.acc: 98.0273, s0.loss_bbox: 0.0340, s1.loss_cls: 0.0241, s1.acc: 98.2184, s1.loss_bbox: 0.0392, s2.loss_cls: 0.0120, s2.acc: 98.2560, s2.loss_bbox: 0.0260, loss: 0.2062
+2022-03-30 19:03:07,070 - mmdet - INFO - Epoch [34][150/212]	lr: 9.502e-06, eta: 0:12:16, time: 1.558, data_time: 0.022, memory: 28892, loss_rpn_cls: 0.0093, loss_rpn_bbox: 0.0079, s0.loss_cls: 0.0516, s0.acc: 98.0620, s0.loss_bbox: 0.0326, s1.loss_cls: 0.0233, s1.acc: 98.2553, s1.loss_bbox: 0.0365, s2.loss_cls: 0.0114, s2.acc: 98.3166, s2.loss_bbox: 0.0253, loss: 0.1978
+2022-03-30 19:04:25,335 - mmdet - INFO - Epoch [34][200/212]	lr: 9.502e-06, eta: 0:11:01, time: 1.565, data_time: 0.022, memory: 28892, loss_rpn_cls: 0.0085, loss_rpn_bbox: 0.0072, s0.loss_cls: 0.0510, s0.acc: 98.0918, s0.loss_bbox: 0.0309, s1.loss_cls: 0.0241, s1.acc: 98.1833, s1.loss_bbox: 0.0365, s2.loss_cls: 0.0117, s2.acc: 98.1813, s2.loss_bbox: 0.0251, loss: 0.1950
+2022-03-30 19:04:44,195 - mmdet - INFO - Saving checkpoint at 34 epochs
+2022-03-30 19:05:28,494 - mmdet - INFO - Evaluating bbox...
+2022-03-30 19:05:28,919 - mmdet - INFO - 
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.244
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=1000 ] = 0.342
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=1000 ] = 0.265
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.003
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.104
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.321
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.398
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=300 ] = 0.398
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=1000 ] = 0.398
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.072
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.268
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.474
+
+2022-03-30 19:05:28,919 - mmdet - INFO - 
++---------------+-------+
+| category      | AP    |
++---------------+-------+
+| General trash | 0.244 |
++---------------+-------+
+2022-03-30 19:05:28,925 - mmdet - INFO - Exp name: cascade_rcnn_swin-s_single_target.py
+2022-03-30 19:05:28,925 - mmdet - INFO - Epoch(val) [34][412]	bbox_mAP: 0.2440, bbox_mAP_50: 0.3420, bbox_mAP_75: 0.2650, bbox_mAP_s: 0.0030, bbox_mAP_m: 0.1040, bbox_mAP_l: 0.3210, bbox_mAP_copypaste: 0.244 0.342 0.265 0.003 0.104 0.321
+2022-03-30 19:06:51,020 - mmdet - INFO - Epoch [35][50/212]	lr: 4.790e-06, eta: 0:09:26, time: 1.641, data_time: 0.083, memory: 28892, loss_rpn_cls: 0.0085, loss_rpn_bbox: 0.0073, s0.loss_cls: 0.0498, s0.acc: 98.1890, s0.loss_bbox: 0.0300, s1.loss_cls: 0.0223, s1.acc: 98.3624, s1.loss_bbox: 0.0346, s2.loss_cls: 0.0106, s2.acc: 98.3500, s2.loss_bbox: 0.0245, loss: 0.1876
+2022-03-30 19:08:09,339 - mmdet - INFO - Epoch [35][100/212]	lr: 4.790e-06, eta: 0:08:10, time: 1.566, data_time: 0.022, memory: 28892, loss_rpn_cls: 0.0107, loss_rpn_bbox: 0.0088, s0.loss_cls: 0.0569, s0.acc: 97.9648, s0.loss_bbox: 0.0349, s1.loss_cls: 0.0246, s1.acc: 98.2088, s1.loss_bbox: 0.0377, s2.loss_cls: 0.0114, s2.acc: 98.2878, s2.loss_bbox: 0.0258, loss: 0.2108
+2022-03-30 19:09:27,983 - mmdet - INFO - Epoch [35][150/212]	lr: 4.790e-06, eta: 0:06:55, time: 1.573, data_time: 0.022, memory: 28892, loss_rpn_cls: 0.0116, loss_rpn_bbox: 0.0087, s0.loss_cls: 0.0504, s0.acc: 98.1748, s0.loss_bbox: 0.0292, s1.loss_cls: 0.0220, s1.acc: 98.4254, s1.loss_bbox: 0.0333, s2.loss_cls: 0.0104, s2.acc: 98.5049, s2.loss_bbox: 0.0226, loss: 0.1882
+2022-03-30 19:10:47,061 - mmdet - INFO - Epoch [35][200/212]	lr: 4.790e-06, eta: 0:05:39, time: 1.582, data_time: 0.022, memory: 28892, loss_rpn_cls: 0.0091, loss_rpn_bbox: 0.0073, s0.loss_cls: 0.0549, s0.acc: 97.9751, s0.loss_bbox: 0.0325, s1.loss_cls: 0.0262, s1.acc: 98.0528, s1.loss_bbox: 0.0376, s2.loss_cls: 0.0128, s2.acc: 98.1234, s2.loss_bbox: 0.0262, loss: 0.2066
+2022-03-30 19:11:05,818 - mmdet - INFO - Saving checkpoint at 35 epochs
+2022-03-30 19:11:50,287 - mmdet - INFO - Evaluating bbox...
+2022-03-30 19:11:50,727 - mmdet - INFO - 
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.243
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=1000 ] = 0.340
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=1000 ] = 0.267
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.002
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.104
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.319
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.402
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=300 ] = 0.402
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=1000 ] = 0.402
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.072
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.266
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.479
+
+2022-03-30 19:11:50,728 - mmdet - INFO - 
++---------------+-------+
+| category      | AP    |
++---------------+-------+
+| General trash | 0.243 |
++---------------+-------+
+2022-03-30 19:11:50,735 - mmdet - INFO - Exp name: cascade_rcnn_swin-s_single_target.py
+2022-03-30 19:11:50,735 - mmdet - INFO - Epoch(val) [35][412]	bbox_mAP: 0.2430, bbox_mAP_50: 0.3400, bbox_mAP_75: 0.2670, bbox_mAP_s: 0.0020, bbox_mAP_m: 0.1040, bbox_mAP_l: 0.3190, bbox_mAP_copypaste: 0.243 0.340 0.267 0.002 0.104 0.319
+2022-03-30 19:13:12,416 - mmdet - INFO - Epoch [36][50/212]	lr: 1.949e-06, eta: 0:04:05, time: 1.633, data_time: 0.083, memory: 28892, loss_rpn_cls: 0.0097, loss_rpn_bbox: 0.0085, s0.loss_cls: 0.0550, s0.acc: 98.0010, s0.loss_bbox: 0.0331, s1.loss_cls: 0.0249, s1.acc: 98.2273, s1.loss_bbox: 0.0383, s2.loss_cls: 0.0126, s2.acc: 98.2039, s2.loss_bbox: 0.0264, loss: 0.2086
+2022-03-30 19:14:30,774 - mmdet - INFO - Epoch [36][100/212]	lr: 1.949e-06, eta: 0:02:49, time: 1.567, data_time: 0.022, memory: 28892, loss_rpn_cls: 0.0085, loss_rpn_bbox: 0.0081, s0.loss_cls: 0.0510, s0.acc: 98.0762, s0.loss_bbox: 0.0317, s1.loss_cls: 0.0231, s1.acc: 98.3087, s1.loss_bbox: 0.0366, s2.loss_cls: 0.0114, s2.acc: 98.2514, s2.loss_bbox: 0.0251, loss: 0.1955
+2022-03-30 19:15:49,148 - mmdet - INFO - Epoch [36][150/212]	lr: 1.949e-06, eta: 0:01:33, time: 1.567, data_time: 0.022, memory: 28892, loss_rpn_cls: 0.0088, loss_rpn_bbox: 0.0065, s0.loss_cls: 0.0497, s0.acc: 98.1865, s0.loss_bbox: 0.0295, s1.loss_cls: 0.0221, s1.acc: 98.3989, s1.loss_bbox: 0.0340, s2.loss_cls: 0.0109, s2.acc: 98.3852, s2.loss_bbox: 0.0230, loss: 0.1845
+2022-03-30 19:17:08,804 - mmdet - INFO - Epoch [36][200/212]	lr: 1.949e-06, eta: 0:00:18, time: 1.593, data_time: 0.022, memory: 28892, loss_rpn_cls: 0.0091, loss_rpn_bbox: 0.0076, s0.loss_cls: 0.0503, s0.acc: 98.1719, s0.loss_bbox: 0.0298, s1.loss_cls: 0.0223, s1.acc: 98.4316, s1.loss_bbox: 0.0337, s2.loss_cls: 0.0107, s2.acc: 98.5242, s2.loss_bbox: 0.0246, loss: 0.1880
+2022-03-30 19:17:27,943 - mmdet - INFO - Saving checkpoint at 36 epochs
+2022-03-30 19:18:11,995 - mmdet - INFO - Evaluating bbox...
+2022-03-30 19:18:12,450 - mmdet - INFO - 
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.243
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=1000 ] = 0.342
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=1000 ] = 0.264
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.003
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.105
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.318
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.399
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=300 ] = 0.399
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=1000 ] = 0.399
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=1000 ] = 0.072
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=1000 ] = 0.271
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=1000 ] = 0.473
+
+2022-03-30 19:18:12,450 - mmdet - INFO - 
++---------------+-------+
+| category      | AP    |
++---------------+-------+
+| General trash | 0.243 |
++---------------+-------+
+2022-03-30 19:18:12,456 - mmdet - INFO - Exp name: cascade_rcnn_swin-s_single_target.py
+2022-03-30 19:18:12,457 - mmdet - INFO - Epoch(val) [36][412]	bbox_mAP: 0.2430, bbox_mAP_50: 0.3420, bbox_mAP_75: 0.2640, bbox_mAP_s: 0.0030, bbox_mAP_m: 0.1050, bbox_mAP_l: 0.3180, bbox_mAP_copypaste: 0.243 0.342 0.264 0.003 0.105 0.318

@@ -1,4 +1,4 @@
-checkpoint_config = dict(max_keep_ckpts=5, interval=1) #### 최근 5개 모델만 저장
+checkpoint_config = dict(max_keep_ckpts=1, interval=1) #### 최근 2개 모델만 저장
 
 # yapf:disable
 log_config = dict(
@@ -11,7 +11,7 @@ log_config = dict(
                 init_kwargs=dict(
                 project= 'two-stage-model',
                 entity = 'canvas11',
-                name = 'LEE_DetectoRS_cascade_rcnn_r50_1x_Mosaic_finetune' ######
+                name = 'LEE_SwinL_Cascade_anchor_scale_iou_TOTAL_DATA' ######
             ),
         )
     ])

@@ -1,7 +1,7 @@
 _base_ = [
     '../models/cascade_rcnn_r50_fpn.py',
-    '../datasets/coco_detection_mosaic.py',
-    '../schedules/schedule_3x_mosaic.py', '../default_runtime.py'
+    '../datasets/coco_detection.py',
+    '../schedules/schedule_3x.py', '../default_runtime.py'
 ]
 
 model = dict(

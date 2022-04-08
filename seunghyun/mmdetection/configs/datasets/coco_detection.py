@@ -8,7 +8,7 @@ classes = ("General trash", "Paper", "Paper pack", "Metal", "Glass",
 img_norm_cfg = dict(
     mean=[123.675, 116.28, 103.53], std=[58.395, 57.12, 57.375], to_rgb=True)
 
-img_scale = (800, 800) #####
+img_scale = (1024, 1024) #####
 
 albu_train_transforms = [
     dict(
@@ -93,12 +93,12 @@ test_pipeline = [
 ]
 
 data = dict(
-    samples_per_gpu=8,
+    samples_per_gpu=2,
     workers_per_gpu=2,
     train=dict(
         type=dataset_type,
         classes = classes, ###########
-        ann_file=data_root + 'stratified_kfold/basic_v2/cv_train_3.json', ###########
+        ann_file=data_root + 'train.json', #'stratified_kfold/basic_v2/cv_train_3.json', ###########
         img_prefix=data_root,  ###########
         pipeline=train_pipeline),
     val=dict(
