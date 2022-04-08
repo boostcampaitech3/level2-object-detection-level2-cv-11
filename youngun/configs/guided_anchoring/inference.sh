@@ -1,7 +1,7 @@
 python ./inference.py \
---config ./faster_rcnn_x101_64x4d_fpn_1x_coco.py \
---epoch epoch_30 \
---work_dir /opt/ml/save/faster-rcnn-resneXt-1024
+--config ./ga_faster_x101_64x4d_fpn_1x_coco.py \
+--epoch best_bbox_mAP_50_epoch_52 \
+--work_dir /opt/ml/save/ga-faster-resneXt-pseudo-1024
 
 
 # # Single

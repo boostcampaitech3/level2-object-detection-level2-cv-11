@@ -61,22 +61,10 @@ train_pipeline = [
 
 train_dataset = dict(
     type=dataset_type,
-        ann_file=ann_root + 'cv_train_3.json',
+        ann_file=data_root + 'train_pseudo.json',
         classes=classes,
         img_prefix=data_root,
-        pipeline=train_pipeline,
-    # _delete_ = True, # remove unnecessary Settings
-    # type='MultiImageMixDataset',
-    # dataset=dict(
-    #     type=dataset_type,
-    #     ann_file=ann_root + 'cv_train_3.json',
-    #     classes=classes,
-    #     img_prefix=data_root,
-    #     # pipeline=[
-    #     #     dict(type='LoadImageFromFile'),
-    #     #     dict(type='LoadAnnotations', with_bbox=True)
-    #     # ],
-    #     pipeline=train_pipeline),
+        pipeline=train_pipeline
     )
 
 
