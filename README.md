@@ -23,7 +23,7 @@
 
 - `김영운` : Faster R-CNN(ResNeXt), Guided-Anchoring-Faster 설계, Mosaic augmentation 실험
 - `이승현` : EfficientDet, DetectoRS 모델 실험, Input size & augmentation 실험, anchor scale 실험
-- `임서현` : HTC(ResNext), YOLOv5, UniverseNet, Deformable DETR 설계 및 실험, Ensemble
+- `임서현` : HTC(ResNeXt), YOLOv5, UniverseNet, Deformable DETR 설계 및 실험, Ensemble
 - `전성휴` : CenterNet, TridentNet, TOOD 등 모델 실험, 앙상블 종류 실험
 - `허석용` : HTC, Cascade, Faster R-CNN(SwinT) 설계 및 실험, TTA, Pseudo labeling 기법 설계
 
@@ -40,7 +40,7 @@
 - UniverseNet → 0.6128 ​​→ 5fold → 0.6466
 
 2-stage detector
-- ga-faster-resNeXt → 0.548 →pseudo→ 0.582
+- Guided-Anchroing-Faster-ResNeXt → 0.548 →pseudo→ 0.582
 - DetectoRS → 0.553
 - Swin-tiny Faster R-CNN → 0.516
 - Swin-small Cascade R-CNN → 0.597
@@ -52,4 +52,5 @@
 ### Reference
 - [MMDetection](https://github.com/open-mmlab/mmdetection)
 - [YOLOv5](https://github.com/ultralytics/yolov5)
-- [BoxInst](https://github.com/wangbo-zhao/OpenMMLab-BoxInst)
+- [Swin Transformer](https://github.com/microsoft/Swin-Transformer)
+- [UniverseNet](https://github.com/shinya7y/UniverseNet)
