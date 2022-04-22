@@ -1,0 +1,29 @@
+# 🎨 [Pstage] CV 11조 CanVas 
+
+![image](https://user-images.githubusercontent.com/91659448/164386988-ddda3bd7-214c-4212-b657-c2fe42975d52.png)
+- 대회 기간 : 2022.03.21 ~ 2022.04.08
+- 목적 : 재활용 품목 분류를 위한 Object Detection
+
+### 🔎 Overview
+
+ '쓰레기 대란', '매립지 부족'과 같은 여러 사회 문제가 나오고 있다. 분리수거는 이러한 환경 부담을 줄일 수 있는 방법 중 하나이다. 잘 분리배출 된 쓰레기는 자원으로서 가치를 인정받아 재활용되지만, 잘못 분리배출 되면 그대로 폐기물로 분류되어 매립 또는 소각되기 때문이다. 따라서 우리는 사진에서 쓰레기를 Detection 하는 모델을 만들어 이러한 문제점을 해결하고자 한다.
+
+### 💾 데이터 셋
+![스크린샷 2022-04-22 오후 3 58 13](https://user-images.githubusercontent.com/68208055/164621090-2ac83869-d6b6-4b6a-bde4-fe5275252d83.png)
+
+- 전체 이미지 개수 : 9754장 (train 4883 장, test 4871 장)
+- 10개 클래스 : General trash, Paper, Paper pack, Metal, Glass, Plastic, Styrofoam, Plastic bag, Battery, Clothing
+- 이미지 크기 : (1024, 1024)
+
+
+### 🧑‍🤝‍🧑 멤버
+| 김영운 | 이승현 | 임서현 | 전성휴 | 허석용 |  
+| :-: | :-: | :-: | :-: | :-: |  
+|[Github](https://github.com/Cronople) | [Github](https://github.com/sseunghyuns) | [Github](https://github.com/seohl16) | [Github](https://github.com/shhommychon) | [Github](https://github.com/HeoSeokYong)
+
+
+
+### Reference
+- [MMDetection](https://github.com/open-mmlab/mmdetection)
+- [YOLOv5](https://github.com/ultralytics/yolov5)
+- [BoxInst](https://github.com/wangbo-zhao/OpenMMLab-BoxInst)
