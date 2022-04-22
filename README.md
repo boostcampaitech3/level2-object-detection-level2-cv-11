@@ -33,6 +33,21 @@
 
 ![스크린샷 2022-04-22 오후 4 44 38](https://user-images.githubusercontent.com/68208055/164637453-d9b0433e-16f5-43cd-ad10-0d08d0dfeeac.png)
 
+### 다양한 모델 실험 
+1-stage detector
+- EfficientDet → 5 fold ensemble → 0.5217
+- YOLOv5 → 0.4543 → 5fold & pseudo → 0.6071
+- UniverseNet → 0.6128 ​​→ 5fold → 0.6466
+
+2-stage detector
+- ga-faster-resNeXt → 0.548 →pseudo→ 0.582
+- DetectoRS → 0.553
+- Swin-tiny Faster R-CNN → 0.516
+- Swin-small Cascade R-CNN → 0.597
+- Swin-base Hybrid Task Cascade R-CNN → 0.6393
+- Swin-large Cascade R-CNN → 0.629
+
+
 
 ### Reference
 - [MMDetection](https://github.com/open-mmlab/mmdetection)
